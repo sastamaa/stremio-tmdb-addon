@@ -1,5 +1,6 @@
 const express = require('express');
 const axios = require('axios');
+const cors = require('cors');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -7,6 +8,8 @@ const TMDB_API_KEY = '28797e7035babad606ddbc1642d2ec8b'; // Replace with your TM
 
 // Middleware to parse JSON
 app.use(express.json());
+
+app.use(cors());
 
 // Stremio manifest
 app.get('/manifest.json', (req, res) => {
