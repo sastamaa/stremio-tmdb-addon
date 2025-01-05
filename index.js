@@ -37,7 +37,7 @@ app.get('/manifest.json', (req, res) => {
 app.get('/catalog/movie/tmdb-movies.json', async (req, res) => {
     try {
         // Fetch details for specific movies (e.g., "Star Wars: Episode IV - A New Hope")
-        const movieIds = ['11']; // TMDB IDs for the movies you want to include
+        const movieIds = ['845781']; // TMDB IDs for the movies you want to include
         const movies = await Promise.all(
             movieIds.map(async (id) => {
                 const response = await axios.get(`https://api.themoviedb.org/3/movie/${id}?api_key=${TMDB_API_KEY}`);
@@ -65,7 +65,7 @@ app.get('/catalog/movie/tmdb-movies.json', async (req, res) => {
 app.get('/catalog/series/tmdb-series.json', async (req, res) => {
     try {
         // Fetch details for specific series (e.g., "The Day of the Jackal")
-        const seriesIds = ['966']; // TMDB IDs for the series you want to include
+        const seriesIds = ['222766']; // TMDB IDs for the series you want to include
         const series = await Promise.all(
             seriesIds.map(async (id) => {
                 const response = await axios.get(`https://api.themoviedb.org/3/tv/${id}?api_key=${TMDB_API_KEY}`);
@@ -169,7 +169,7 @@ app.get('/meta/series/tmdb-series-:id.json', async (req, res) => {
 });
 
 // Stream endpoint for movies
-app.get('/stream/movie/974453-absolution.json', (req, res) => {
+app.get('/stream/movie/tmdb-movie-845781.json', (req, res) => {
     const { id } = req.params;
 
     // Define streaming links for the movie
@@ -187,7 +187,7 @@ app.get('/stream/movie/974453-absolution.json', (req, res) => {
 });
 
 // Stream endpoint for episodes
-app.get('/stream/series/222766-the-day-of-the-jackal.json', (req, res) => {
+app.get('/stream/series/tmdb-series-222766.json', (req, res) => {
     const { id } = req.params;
 
     // Extract season and episode number from the ID
