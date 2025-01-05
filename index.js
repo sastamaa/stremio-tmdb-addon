@@ -146,37 +146,34 @@ app.get('/meta/:type/:id.json', async (req, res) => {
 });
 
 // Stream endpoint for movies and episodes
-app.get('/stream/:type/:id.json', (req, res) => {
-    const { type, id } = req.params;
+app.get('/stream/series/222766-the-day-of-the-jackal.json', (req, res) => {
+    const { id } = req.params;
 
-    if (type === 'movie') {
-        // Handle movie streaming links
-        const streams = [
-            {
-                title: 'Example Movie Stream',
-                url: 'https://example.com/movies/movie-123.mp4', // Replace with actual stream URL
-                behaviorHints: {
-                    notWebReady: true,
-                }
+    // Extract season and episode number from the ID
+    const [seriesId, seasonEpisode] = id.split('-s');
+    const [season, episode] = seasonEpisode.split('e');
+
+    // Define streaming links for each episode
+    const streams = [];
+    if (season === '1' && episode === '1') {
+        streams.push({
+            title: 'Episode 1',
+            url: 'https://www.cdn.vidce.net/d/2696I8vGmWivvbz4qhGlAQ/1736720419/video/The_Day_Of_The_Jackal/1x01.mp4', // Replace with actual streaming link for Episode 1
+            behaviorHints: {
+                notWebReady: true, // Set to true if the stream is not directly playable in a browser
             }
-        ];
-        res.json({ streams: streams });
-    } else if (type === 'series') {
-        // Handle episode streaming links
-        const episodeId = id.split('-')[2]; // Extract TMDB episode ID
-        const streams = [
-            {
-                title: 'Example Episode Stream',
-                url: `https://example.com/episodes/episode-${episodeId}.mp4`, // Replace with actual stream URL
-                behaviorHints: {
-                    notWebReady: true,
-                }
+        });
+    } else if (season === '1' && episode === '2') {
+        streams.push({
+            title: 'Episode 2',
+            url: 'https://www.cdn.vidce.net/d/2696I8vGmWivvbz4qhGlAQ/1736720419/video/The_Day_Of_The_Jackal/1x02.mp4', // Replace with actual streaming link for Episode 2
+            behaviorHints: {
+                notWebReady: true,
             }
-        ];
-        res.json({ streams: streams });
-    } else {
-        res.status(400).json({ error: 'Invalid type' });
+        });
     }
+
+    res.json({ streams: streams });
 });
 
 // Start the server
