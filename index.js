@@ -3,7 +3,7 @@ const cors = require('cors');
 const axios = require('axios');
 const app = express();
 const PORT = process.env.PORT || 3000;
-const TMDB_API_KEY = 'YOUR_TMDB_API_KEY'; // Replace with your TMDB API key
+const TMDB_API_KEY = '28797e7035babad606ddbc1642d2ec8b'; // Replace with your TMDB API key
 
 app.use(cors());
 
