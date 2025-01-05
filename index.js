@@ -169,7 +169,7 @@ app.get('/meta/series/tmdb-series-:id.json', async (req, res) => {
 });
 
 // Stream endpoint for movies
-app.get('/stream/movie/tmdb-movie-974453.json', (req, res) => {
+app.get('/stream/movie/974453-absolution.json', (req, res) => {
     const { id } = req.params;
 
     // Define streaming links for the movie
@@ -187,7 +187,7 @@ app.get('/stream/movie/tmdb-movie-974453.json', (req, res) => {
 });
 
 // Stream endpoint for episodes
-app.get('/stream/series/tmdb-series-222766.json', (req, res) => {
+app.get('/stream/series/222766-the-day-of-the-jackal.json', (req, res) => {
     const { id } = req.params;
 
     // Extract season and episode number from the ID
