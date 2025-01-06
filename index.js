@@ -104,23 +104,38 @@ app.get('/meta/movie/tmdb-movie-:id.json', async (req, res) => {
 // Stream endpoint for movies
 app.get('/stream/movie/tmdb-movie-:id.json', (req, res) => {
     const { id } = req.params;
-    const streams = [];
-    if (id === 'tmdb-movie-335983') {
-        streams.push({
-            title: 'Venom',
-            url: 'https://www.sw.vidce.net/d/s2s_WqWpdLUdeC3VZ-8QbA/1736801246/video/2015/tt1270797.mp4',
-            behaviorHints: { notWebReady: false }
-        });
-    } else if (id === 'tmdb-movie-402431') {
-        streams.push({
-            title: 'Wicked',
-            url: 'https://www.sw.vidce.net/d/DGzpZhw-pogcQFLFAu8Jbg/1736726662/video/2015/tt1262426.mp4',
-            behaviorHints: { notWebReady: true }
-        });
-    }
 
-    res.json({ streams });
+    // Example data for demo purposes
+    const availableStreams = {
+        '335983': {
+            title: 'Venom',
+            url: 'https://www.sw.vidce.net/d/s2s_WqWpdLUdeC3VZ-8QbA/1736801246/video/2015/tt1270797.mp4', // Replace with actual links
+        },
+        '402431': {
+            title: 'Wicked',
+            url: 'https://www.sw.vidce.net/d/bVWmOLjKiF4dIZ13GHbf7g/1736801777/video/2015/tt1262426.mp4', // Replace with actual links
+        },
+    };
+
+    const tmdbId = id.split('-')[2]; // Extract TMDB ID
+    console.log('Fetching stream for TMDB ID:', tmdbId);
+
+    if (availableStreams[tmdbId]) {
+        const stream = availableStreams[tmdbId];
+        res.json({ streams: [
+            {
+                title: stream.title,
+                url: stream.url,
+                behaviorHints: {
+                    notWebReady: false,
+                },
+            },
+        ] });
+    } else {
+        res.json({ streams: [] });
+    }
 });
+
 
 // Catalog endpoint for series
 app.get('/catalog/series/tmdb-series.json', async (req, res) => {
@@ -172,6 +187,65 @@ app.get('/meta/series/tmdb-series-:id.json', async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch meta data' });
     }
 });
+
+app.get('/stream/series/tmdb-series-:id.json', (req, res) => {
+    const { id } = req.params;
+
+    // Log the received Stremio series ID
+    console.log('Fetching stream for series with ID:', id);
+
+    // Example streams data
+    const availableStreams = {
+        '60625-s1e1': {
+            title: 'Rick and Morty - S1E1',
+            url: 'https://example.com/rick-and-morty-s1e1.mp4',
+        },
+        '60625-s1e2': {
+            title: 'Rick and Morty - S1E2',
+            url: 'https://example.com/rick-and-morty-s1e2.mp4',
+        },
+        '966-s1e1': {
+            title: 'The Day of the Jackal - S1E1',
+            url: 'https://example.com/jackal-s1e1.mp4',
+        },
+        '966-s1e2': {
+            title: 'The Day of the Jackal - S1E2',
+            url: 'https://example.com/jackal-s1e2.mp4',
+        },
+    };
+
+    // Extract series ID and season/episode details from the provided Stremio ID
+    const matches = id.match(/(\d+)-s(\d+)e(\d+)/); // Regex to parse "60625-s1e1"
+    if (!matches) {
+        console.error('Invalid series ID format:', id);
+        return res.status(400).json({ error: 'Invalid series ID format' });
+    }
+
+    const [, seriesId, season, episode] = matches; // Extract TMDB ID, season, and episode
+    const key = `${seriesId}-s${season}e${episode}`;
+
+    console.log('Extracted series details:', { seriesId, season, episode });
+
+    // Check if a stream is available for the given key
+    if (availableStreams[key]) {
+        const stream = availableStreams[key];
+        res.json({
+            streams: [
+                {
+                    title: stream.title,
+                    url: stream.url, // Replace with your actual streaming link
+                    behaviorHints: {
+                        notWebReady: false,
+                    },
+                },
+            ],
+        });
+    } else {
+        console.log('No stream found for key:', key);
+        res.json({ streams: [] }); // Return empty array if no stream is found
+    }
+});
+
 
 // Start the server
 app.listen(PORT, () => {
