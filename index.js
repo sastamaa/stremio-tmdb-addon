@@ -9,9 +9,6 @@ const TMDB_API_KEY = '28797e7035babad606ddbc1642d2ec8b'; // Replace with your TM
 
 app.use(cors());
 
-// Serve static video files
-app.use('/movies', express.static(path.join(__dirname, 'movies')));
-
 // Manifest endpoint
 app.get('/manifest.json', (req, res) => {
     res.json({
