@@ -110,10 +110,16 @@ app.get('/stream/movie/tmdb-movie-:id.json', (req, res) => {
         '335983': {
             title: 'Venom',
             url: 'https://www.sw.vidce.net/d/s2s_WqWpdLUdeC3VZ-8QbA/1736801246/video/2015/tt1270797.mp4', // Replace with actual links
+            "behaviorHints": {
+        "notWebReady": false
+    }
         },
         '402431': {
             title: 'Wicked',
             url: 'https://www.sw.vidce.net/d/bVWmOLjKiF4dIZ13GHbf7g/1736801777/video/2015/tt1262426.mp4', // Replace with actual links
+            "behaviorHints": {
+        "notWebReady": false
+    }
         },
     };
 
