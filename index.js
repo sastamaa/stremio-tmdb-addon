@@ -36,8 +36,8 @@ app.get('/manifest.json', (req, res) => {
 // Catalog endpoint for movies
 app.get('/catalog/movie/tmdb-movies.json', async (req, res) => {
     try {
-        // Fetch details for specific movies (e.g., "Star Wars: Episode IV - A New Hope")
-        const movieIds = ['845781']; // TMDB IDs for the movies you want to include
+        // Fetch details for specific movies
+        const movieIds = ['335983', '653346']; // TMDB IDs for the movies you want to include
         const movies = await Promise.all(
             movieIds.map(async (id) => {
                 const response = await axios.get(`https://api.themoviedb.org/3/movie/${id}?api_key=${TMDB_API_KEY}`);
@@ -169,19 +169,30 @@ app.get('/meta/series/tmdb-series-:id.json', async (req, res) => {
 });
 
 // Stream endpoint for movies
-app.get('/stream/movie/tmdb-movie-845781.json', (req, res) => {
+app.get('/stream/movie/tmdb-movie-:id.json', (req, res) => {
     const { id } = req.params;
 
     // Define streaming links for the movie
-    const streams = [
-        {
-            title: 'Example Movie Stream',
-            url: 'https://www.cdn.vidce.net/d/2696I8vGmWivvbz4qhGlAQ/1736720419/video/The_Day_Of_The_Jackal/1x01.mp4', // Replace with actual streaming link
+    const streams = [];
+    if (id === 'tmdb-movie-335983') {
+        // Streaming link for "Venom"
+        streams.push({
+            title: 'Venom',
+            url: 'https://www.sw.vidce.net/d/5oC7zNXVKivcdyWquO_x_g/1736726618/video/2015/tt1270797.mp4', // Replace with actual streaming link for Venom
             behaviorHints: {
                 notWebReady: true, // Set to true if the stream is not directly playable in a browser
             }
-        }
-    ];
+        });
+    } else if (id === 'tmdb-movie-653346') {
+        // Streaming link for "Wicked"
+        streams.push({
+            title: 'Wicked',
+            url: 'https://www.sw.vidce.net/d/DGzpZhw-pogcQFLFAu8Jbg/1736726662/video/2015/tt1262426.mp4', // Replace with actual streaming link for Wicked
+            behaviorHints: {
+                notWebReady: true,
+            }
+        });
+    }
 
     res.json({ streams: streams });
 });
