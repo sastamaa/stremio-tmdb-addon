@@ -53,7 +53,7 @@ async function fetchFromTMDB(url) {
 // Catalog endpoint for movies
 app.get('/catalog/movie/tmdb-movies.json', async (req, res) => {
     try {
-        const movieIds = ['335983', '653346'];
+        const movieIds = ['335983', '402431'];
         const movies = await Promise.all(
             movieIds.map(async (id) => {
                 const movieData = await fetchFromTMDB(`https://api.themoviedb.org/3/movie/${id}?api_key=${TMDB_API_KEY}`);
@@ -108,13 +108,13 @@ app.get('/stream/movie/tmdb-movie-:id.json', (req, res) => {
     if (id === 'tmdb-movie-335983') {
         streams.push({
             title: 'Venom',
-            url: 'venom.mp4',
-            behaviorHints: { notWebReady: true }
+            url: 'https://www.sw.vidce.net/d/s2s_WqWpdLUdeC3VZ-8QbA/1736801246/video/2015/tt1270797.mp4',
+            behaviorHints: { notWebReady: false }
         });
-    } else if (id === 'tmdb-movie-653346') {
+    } else if (id === 'tmdb-movie-402431') {
         streams.push({
             title: 'Wicked',
-            url: 'wicked.mp4',
+            url: 'https://www.sw.vidce.net/d/DGzpZhw-pogcQFLFAu8Jbg/1736726662/video/2015/tt1262426.mp4',
             behaviorHints: { notWebReady: true }
         });
     }
