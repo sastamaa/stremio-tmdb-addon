@@ -194,12 +194,12 @@ app.get('/meta/series/tmdb-series-:id.json', async (req, res) => {
     }
 });
 
-app.get('/stream/series/tmdb-series-:id.json', (req, res) => {
+app.get('/stream/series/:id.json', (req, res) => {
     const { id } = req.params;
     console.log('Received ID:', id); // Debugging log for received ID
 
-    // Validate and extract details using a RegEx pattern
-    const match = id.match(/^tmdb-series-(\d+)-s(\d+)e(\d+)$/);
+    // Validate and extract details using an updated pattern
+    const match = id.match(/^(\d+)-s(\d+)e(\d+)$/); // Adjusted regex for the new format
     if (!match) {
         console.error('Invalid ID format:', id); // Debugging log for invalid format
         return res.status(400).json({ error: 'Invalid series ID format' });
@@ -252,6 +252,7 @@ app.get('/stream/series/tmdb-series-:id.json', (req, res) => {
     console.log('Returning streams:', streams); // Debugging log
     res.json({ streams });
 });
+
 
 // Start the server
 app.listen(PORT, () => {
