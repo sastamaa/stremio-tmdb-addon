@@ -9,6 +9,9 @@ const TMDB_API_KEY = '28797e7035babad606ddbc1642d2ec8b'; // Replace with your TM
 
 app.use(cors());
 
+// Serve static video files
+app.use('/movies', express.static(path.join(__dirname, 'movies')));
+
 // Manifest endpoint
 app.get('/manifest.json', (req, res) => {
     res.json({
@@ -109,7 +112,7 @@ app.get('/stream/movie/tmdb-movie-:id.json', (req, res) => {
     const availableStreams = {
         '335983': {
             title: 'Venom',
-            url: 'https://ashdi.vip/video17/2/new/the.shadow.strays.2024.ua.dub.tak.treba.prodakshn_146773/hls/1080/DaqXjXWRkeBYhA37BA==/index.m3u8', // Replace with actual links
+            url: 'https://www.sw.vidce.net/d/bVWmOLjKiF4dIZ13GHbf7g/1736801777/video/2015/tt1262426.mp4', // Replace with actual links
             "behaviorHints": {
         "notWebReady": true
     }
