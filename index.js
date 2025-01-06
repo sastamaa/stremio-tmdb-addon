@@ -36,10 +36,13 @@ app.get('/manifest.json', (req, res) => {
 // Catalog endpoint for movies
 app.get('/catalog/movie/tmdb-movies.json', async (req, res) => {
     try {
-        // Fetch details for specific movies
-        const movieIds = ['335983', '653346']; // TMDB IDs for the movies you want to include
+        console.log('Fetching catalog for movies...'); // Debugging log
+
+        // Fetch details for specific movies (e.g., "Venom" and "Wicked")
+        const movieIds = ['335983', '653346']; // TMDB IDs for "Venom" and "Wicked"
         const movies = await Promise.all(
             movieIds.map(async (id) => {
+                console.log(`Fetching movie details for TMDB ID: ${id}`); // Debugging log
                 const response = await axios.get(`https://api.themoviedb.org/3/movie/${id}?api_key=${TMDB_API_KEY}`);
                 const movieData = response.data;
                 return {
@@ -54,20 +57,85 @@ app.get('/catalog/movie/tmdb-movies.json', async (req, res) => {
             })
         );
 
-        // Return only the specified movies in the catalog
+        console.log('Returning catalog for movies:', movies); // Debugging log
         res.json({ metas: movies });
     } catch (error) {
+        console.error('Error fetching catalog for movies:', error); // Debugging log
         res.status(500).json({ error: 'Failed to fetch movies' });
     }
+});
+
+// Meta endpoint for movies
+app.get('/meta/movie/tmdb-movie-:id.json', async (req, res) => {
+    const { id } = req.params;
+    console.log('Fetching meta data for movie with ID:', id); // Debugging log
+
+    try {
+        const movieId = id.split('-')[2]; // Extract TMDB ID from the Stremio ID
+        console.log('Extracted TMDB ID:', movieId); // Debugging log
+
+        const response = await axios.get(`https://api.themoviedb.org/3/movie/${movieId}?api_key=${TMDB_API_KEY}`);
+        console.log('TMDB API response:', response.data); // Debugging log
+
+        const movieData = response.data;
+        const meta = {
+            id: `tmdb-movie-${movieData.id}`,
+            type: 'movie',
+            name: movieData.title,
+            poster: `https://image.tmdb.org/t/p/w500${movieData.poster_path}`,
+            description: movieData.overview,
+            releaseInfo: movieData.release_date,
+            genres: movieData.genres.map(genre => genre.name)
+        };
+
+        console.log('Returning meta data:', meta); // Debugging log
+        res.json({ meta: meta });
+    } catch (error) {
+        console.error('Error fetching meta data:', error); // Debugging log
+        res.status(500).json({ error: 'Failed to fetch meta data' });
+    }
+});
+
+// Stream endpoint for movies
+app.get('/stream/movie/tmdb-movie-:id.json', (req, res) => {
+    const { id } = req.params;
+    console.log('Fetching stream for movie with ID:', id); // Debugging log
+
+    const streams = [];
+    if (id === 'tmdb-movie-335983') {
+        // Streaming link for "Venom"
+        streams.push({
+            title: 'Venom',
+            url: 'venom.mp4', // Replace with actual streaming link for Venom
+            behaviorHints: {
+                notWebReady: true,
+            }
+        });
+    } else if (id === 'tmdb-movie-653346') {
+        // Streaming link for "Wicked"
+        streams.push({
+            title: 'Wicked',
+            url: 'wicked.mp4', // Replace with actual streaming link for Wicked
+            behaviorHints: {
+                notWebReady: true,
+            }
+        });
+    }
+
+    console.log('Returning streams:', streams); // Debugging log
+    res.json({ streams: streams });
 });
 
 // Catalog endpoint for series
 app.get('/catalog/series/tmdb-series.json', async (req, res) => {
     try {
-        // Fetch details for specific series (e.g., "The Day of the Jackal")
-        const seriesIds = ['222766']; // TMDB IDs for the series you want to include
+        console.log('Fetching catalog for series...'); // Debugging log
+
+        // Fetch details for specific series (e.g., "The Day of the Jackal" and "Rick and Morty")
+        const seriesIds = ['966', '60625']; // TMDB IDs for "The Day of the Jackal" and "Rick and Morty"
         const series = await Promise.all(
             seriesIds.map(async (id) => {
+                console.log(`Fetching series details for TMDB ID: ${id}`); // Debugging log
                 const response = await axios.get(`https://api.themoviedb.org/3/tv/${id}?api_key=${TMDB_API_KEY}`);
                 const seriesData = response.data;
                 return {
@@ -82,64 +150,38 @@ app.get('/catalog/series/tmdb-series.json', async (req, res) => {
             })
         );
 
-        // Return only the specified series in the catalog
+        console.log('Returning catalog for series:', series); // Debugging log
         res.json({ metas: series });
     } catch (error) {
+        console.error('Error fetching catalog for series:', error); // Debugging log
         res.status(500).json({ error: 'Failed to fetch series' });
-    }
-});
-
-// Meta endpoint for movies
-app.get('/meta/movie/tmdb-movie-:id.json', async (req, res) => {
-    const { id } = req.params;
-
-    try {
-        // Fetch movie details from TMDB
-        const movieId = id.split('-')[2]; // Extract TMDB ID from the Stremio ID
-        const response = await axios.get(`https://api.themoviedb.org/3/movie/${movieId}?api_key=${TMDB_API_KEY}`);
-        const movieData = response.data;
-
-        // Construct the meta object for Stremio
-        const meta = {
-            id: `tmdb-movie-${movieData.id}`,
-            type: 'movie',
-            name: movieData.title,
-            poster: `https://image.tmdb.org/t/p/w500${movieData.poster_path}`,
-            description: movieData.overview,
-            releaseInfo: movieData.release_date,
-            genres: movieData.genres.map(genre => genre.name)
-        };
-
-        res.json({ meta: meta });
-    } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch meta data' });
     }
 });
 
 // Meta endpoint for series
 app.get('/meta/series/tmdb-series-:id.json', async (req, res) => {
     const { id } = req.params;
+    console.log('Fetching meta data for series with ID:', id); // Debugging log
 
     try {
-        // Fetch series details from TMDB
         const seriesId = id.split('-')[2]; // Extract TMDB ID from the Stremio ID
-        const response = await axios.get(`https://api.themoviedb.org/3/tv/${seriesId}?api_key=${TMDB_API_KEY}`);
-        const seriesData = response.data;
+        console.log('Extracted TMDB ID:', seriesId); // Debugging log
 
-        // Fetch season details
+        const response = await axios.get(`https://api.themoviedb.org/3/tv/${seriesId}?api_key=${TMDB_API_KEY}`);
+        console.log('TMDB API response:', response.data); // Debugging log
+
+        const seriesData = response.data;
         const seasons = await Promise.all(
             seriesData.seasons.map(async (season) => {
                 const seasonResponse = await axios.get(
                     `https://api.themoviedb.org/3/tv/${seriesId}/season/${season.season_number}?api_key=${TMDB_API_KEY}`
                 );
-                const seasonData = seasonResponse.data;
-
                 return {
                     season: season.season_number,
                     title: season.name,
                     overview: season.overview,
                     poster: `https://image.tmdb.org/t/p/w500${season.poster_path}`,
-                    episodes: seasonData.episodes.map(episode => ({
+                    episodes: seasonResponse.data.episodes.map(episode => ({
                         id: `tmdb-series-${seriesId}-s${season.season_number}e${episode.episode_number}`,
                         title: episode.name,
                         overview: episode.overview,
@@ -150,7 +192,6 @@ app.get('/meta/series/tmdb-series-:id.json', async (req, res) => {
             })
         );
 
-        // Construct the meta object for Stremio
         const meta = {
             id: `tmdb-series-${seriesData.id}`,
             type: 'series',
@@ -162,69 +203,45 @@ app.get('/meta/series/tmdb-series-:id.json', async (req, res) => {
             seasons: seasons
         };
 
+        console.log('Returning meta data:', meta); // Debugging log
         res.json({ meta: meta });
     } catch (error) {
+        console.error('Error fetching meta data:', error); // Debugging log
         res.status(500).json({ error: 'Failed to fetch meta data' });
     }
 });
 
-// Stream endpoint for movies
-app.get('/stream/movie/tmdb-movie-:id.json', (req, res) => {
+// Stream endpoint for series
+app.get('/stream/series/tmdb-series-:id.json', (req, res) => {
     const { id } = req.params;
+    console.log('Fetching stream for series with ID:', id); // Debugging log
 
-    // Define streaming links for the movie
-    const streams = [];
-    if (id === 'tmdb-movie-335983') {
-        // Streaming link for "Venom"
-        streams.push({
-            title: 'Venom',
-            url: 'https://www.sw.vidce.net/d/5oC7zNXVKivcdyWquO_x_g/1736726618/video/2015/tt1270797.mp4', // Replace with actual streaming link for Venom
-            behaviorHints: {
-                notWebReady: true, // Set to true if the stream is not directly playable in a browser
-            }
-        });
-    } else if (id === 'tmdb-movie-653346') {
-        // Streaming link for "Wicked"
-        streams.push({
-            title: 'Wicked',
-            url: 'https://www.sw.vidce.net/d/DGzpZhw-pogcQFLFAu8Jbg/1736726662/video/2015/tt1262426.mp4', // Replace with actual streaming link for Wicked
-            behaviorHints: {
-                notWebReady: true,
-            }
-        });
-    }
-
-    res.json({ streams: streams });
-});
-
-// Stream endpoint for episodes
-app.get('/stream/series/tmdb-series-222766.json', (req, res) => {
-    const { id } = req.params;
-
-    // Extract season and episode number from the ID
+    // Extract series ID, season, and episode number from the ID
     const [seriesId, seasonEpisode] = id.split('-s');
     const [season, episode] = seasonEpisode.split('e');
 
-    // Define streaming links for each episode
     const streams = [];
-    if (season === '1' && episode === '1') {
+    if (seriesId === 'tmdb-series-966') {
+        // Streaming link for "The Day of the Jackal"
         streams.push({
-            title: 'Episode 1',
-            url: 'htttp://episode_1.mp4', // Replace with actual streaming link for Episode 1
+            title: `The Day of the Jackal - S${season}E${episode}`,
+            url: 'jackal.mp4', // Replace with actual streaming link for "The Day of the Jackal"
             behaviorHints: {
-                notWebReady: true, // Set to true if the stream is not directly playable in a browser
+                notWebReady: true,
             }
         });
-    } else if (season === '1' && episode === '2') {
+    } else if (seriesId === 'tmdb-series-60625') {
+        // Streaming link for "Rick and Morty"
         streams.push({
-            title: 'Episode 2',
-            url: 'htttp://episode_2.mp4', // Replace with actual streaming link for Episode 2
+            title: `Rick and Morty - S${season}E${episode}`,
+            url: 'morty.mp4', // Replace with actual streaming link for "Rick and Morty"
             behaviorHints: {
                 notWebReady: true,
             }
         });
     }
 
+    console.log('Returning streams:', streams); // Debugging log
     res.json({ streams: streams });
 });
 
