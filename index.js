@@ -196,61 +196,85 @@ app.get('/meta/series/tmdb-series-:id.json', async (req, res) => {
 
 app.get('/stream/series/:id.json', (req, res) => {
     const { id } = req.params;
-    console.log('Received ID:', id); // Debugging log for received ID
+    console.log('Received stream request for series:', id); // Debugging log
 
-    // Validate and extract details using an updated pattern
-    const match = id.match(/^(\d+)-s(\d+)e(\d+)$/); // Adjusted regex for the new format
-    if (!match) {
-        console.error('Invalid ID format:', id); // Debugging log for invalid format
-        return res.status(400).json({ error: 'Invalid series ID format' });
-    }
+    // Match TMDb format (e.g., 60625-s1e1)
+    const tmdbMatch = id.match(/^(\d+)-s(\d+)e(\d+)$/);
+    if (tmdbMatch) {
+        const seriesId = tmdbMatch[1]; // TMDb series ID
+        const season = tmdbMatch[2];  // Extracted season number
+        const episode = tmdbMatch[3]; // Extracted episode number
+        console.log(`Parsed TMDb ID: ${seriesId}, season: ${season}, episode: ${episode}`); // Debugging log
 
-    // Extract series ID, season, and episode from the ID
-    const seriesId = match[1]; // TMDB Series ID
-    const season = match[2];  // Season Number
-    const episode = match[3]; // Episode Number
+        const streams = [];
 
-    console.log(`Parsed seriesId: ${seriesId}, season: ${season}, episode: ${episode}`); // Debugging log
-
-    // Add your streaming links for specific episodes
-    const streams = [];
-
-    // Rick and Morty (TMDB Series ID: 60625)
-    if (seriesId === '60625') {
-        if (season === '1' && episode === '1') {
-            streams.push({
-                title: 'Rick and Morty - S1E1',
-                url: 'https://example.com/rickandmorty/s1e1.mp4',
-                behaviorHints: { notWebReady: false },
-            });
-        } else if (season === '1' && episode === '2') {
-            streams.push({
-                title: 'Rick and Morty - S1E2',
-                url: 'https://example.com/rickandmorty/s1e2.mp4',
-                behaviorHints: { notWebReady: false },
-            });
+        // Handle specific TMDb IDs
+        if (seriesId === '60625') { // Rick and Morty TMDb ID
+            if (season === '1' && episode === '2') {
+                streams.push({
+                    title: 'Rick and Morty - S1E2',
+                    url: 'https://example.com/rickandmorty/s1e2.mp4',
+                    behaviorHints: { notWebReady: false }
+                });
+            }
+        } else if (seriesId === '966') { // The Day of the Jackal TMDb ID
+            if (season === '1' && episode === '1') {
+                streams.push({
+                    title: 'The Day of the Jackal - S1E1',
+                    url: 'https://example.com/jackal/s1e1.mp4',
+                    behaviorHints: { notWebReady: false }
+                });
+            }
         }
-    }
 
-    // The Day of the Jackal (TMDB Series ID: 966)
-    if (seriesId === '222766') {
-        if (season === '1' && episode === '1') {
-            streams.push({
-                title: 'The Day of the Jackal - S1E1',
-                url: 'https://example.com/jackal/s1e1.mp4',
-                behaviorHints: { notWebReady: false },
-            });
+        if (streams.length === 0) {
+            console.error('No streams found for TMDb:', { seriesId, season, episode }); // Debugging log
+            return res.status(404).json({ error: 'No streams found' });
         }
+
+        console.log('Returning streams:', streams); // Debugging log
+        return res.json({ streams });
     }
 
-    // If no streams are found for the episode, return an error
-    if (streams.length === 0) {
-        console.error(`No streams found for seriesId: ${seriesId}, season: ${season}, episode: ${episode}`);
-        return res.status(404).json({ error: 'No streams found for this episode' });
+    // Handle IMDb-like format (e.g., tt{id}:season:episode)
+    const imdbMatch = id.match(/^tt\d+:(\d+):(\d+)$/);
+    if (imdbMatch) {
+        const season = imdbMatch[1];
+        const episode = imdbMatch[2];
+        console.log(`Parsed IMDb season: ${season}, episode: ${episode}`); // Debugging log
+
+        const streams = [];
+
+        // Example handling IMDb ID for Rick and Morty
+        if (id.startsWith('tt3006802')) { // Rick and Morty IMDb ID
+            if (season === '1' && episode === '2') {
+                streams.push({
+                    title: 'Rick and Morty - S1E2',
+                    url: 'https://example.com/rickandmorty/s1e2.mp4',
+                    behaviorHints: { notWebReady: false }
+                });
+            }
+        } else if (id.startsWith('tt966')) { // The Day of the Jackal IMDb ID
+            if (season === '1' && episode === '1') {
+                streams.push({
+                    title: 'The Day of the Jackal - S1E1',
+                    url: 'https://example.com/jackal/s1e1.mp4',
+                    behaviorHints: { notWebReady: false }
+                });
+            }
+        }
+
+        if (streams.length === 0) {
+            console.error('No streams found for IMDb:', { season, episode }); // Debugging log
+            return res.status(404).json({ error: 'No streams found' });
+        }
+
+        console.log('Returning streams:', streams); // Debugging log
+        return res.json({ streams });
     }
 
-    console.log('Returning streams:', streams); // Debugging log
-    res.json({ streams });
+    console.error('Invalid series ID format:', id); // Debugging log
+    res.status(400).json({ error: 'Invalid series ID format' });
 });
 
 
