@@ -146,7 +146,7 @@ app.get('/stream/movie/tmdb-movie-:id.json', (req, res) => {
 // Catalog endpoint for series
 app.get('/catalog/series/tmdb-series.json', async (req, res) => {
     try {
-        const seriesIds = ['966', '60625'];
+        const seriesIds = ['222766', '60625'];
         const series = await Promise.all(
             seriesIds.map(async (id) => {
                 const seriesData = await fetchFromTMDB(`https://api.themoviedb.org/3/tv/${id}?api_key=${TMDB_API_KEY}`);
@@ -233,7 +233,7 @@ app.get('/stream/series/:id.json', (req, res) => {
     }
 
     // The Day of the Jackal (TMDB Series ID: 966)
-    if (seriesId === '966') {
+    if (seriesId === '222766') {
         if (season === '1' && episode === '1') {
             streams.push({
                 title: 'The Day of the Jackal - S1E1',
