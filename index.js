@@ -196,43 +196,53 @@ app.get('/meta/series/tmdb-series-:id.json', async (req, res) => {
 
 app.get('/stream/series/tmdb-series-:id.json', (req, res) => {
     const { id } = req.params;
-    console.log('Fetching stream for series with ID:', id); // Debug log
+    console.log('Fetching stream for series with ID:', id); // Debugging log
 
-    const match = id.match(/^(.+)-s(\d+)e(\d+)$/); // Extract series ID, season, and episode
+    // Regex to validate and extract "tmdb-series-{seriesId}-s{season}e{episode}"
+    const match = id.match(/^tmdb-series-(\d+)-s(\d+)e(\d+)$/);
     if (!match) {
         return res.status(400).json({ error: 'Invalid series ID format' });
     }
 
-    const seriesId = match[1]; // e.g., "60625"
-    const season = match[2];  // e.g., "5"
-    const episode = match[3]; // e.g., "10"
+    // Extract TMDB Series ID, season, and episode
+    const seriesId = match[1];  // e.g., "60625" (Rick and Morty)
+    const season = match[2];   // e.g., "1"
+    const episode = match[3];  // e.g., "2"
 
-    // Example streaming links for specific episodes (use actual streaming links for production)
+    console.log(`Extracted seriesId: ${seriesId}, season: ${season}, episode: ${episode}`); // Debugging log
+
+    // Example: Add valid streams for episodes
     const streams = [];
-    if (seriesId === '60625') {
-        streams.push({
-            title: `Rick and Morty - S${1}E${1}`,
-            url: `https://ashdi.vip/video8/2/new/high.potential.s01e01.1080p.amzn.webdl.h.264.ukr.eng_151148/hls/1080/AqaXi3WGjuRfmhH2BA==/index.m3u8`,
-            behaviorHints: {
-                notWebReady: true,
-            }
-        });
-    } else if (seriesId === '966') {
-        streams.push({
-            title: `The Day of the Jackal - S1E2`,
-            url: `https://ashdi.vip/video8/2/new/high.potential.s01e01.1080p.amzn.webdl.h.264.ukr.eng_151148/hls/1080/AqaXi3WGjuRfmhH2BA==/index.m3u8`,
-            behaviorHints: {
-                notWebReady: true,
-            }
-        });
+    if (seriesId === '60625') { // Rick and Morty TMDB ID
+        if (season === '1' && episode === '2') { // Season 1, Episode 2
+            streams.push({
+                title: `Rick and Morty - S1E2`,
+                url: `https://ashdi.vip/video8/2/new/high.potential.s01e01.1080p.amzn.webdl.h.264.ukr.eng_151148/hls/1080/AqaXi3WGjuRfmhH2BA==/index.m3u8`, // Replace with actual streaming link
+                behaviorHints: {
+                    notWebReady: false,
+                },
+            });
+        }
+    } else if (seriesId === '966') { // The Day of the Jackal TMDB ID
+        if (season === '1' && episode === '1') { // Season 1, Episode 1
+            streams.push({
+                title: `The Day of the Jackal - S${season}E${episode}`,
+                url: `https://example.com/jackal/s${season}e${episode}.mp4`, // Replace with actual streaming link
+                behaviorHints: {
+                    notWebReady: false,
+                },
+            });
+        }
     }
 
+    // Respond with streams or an error if no streams found
     if (streams.length === 0) {
-        return res.status(404).json({ error: 'No streams found' });
+        console.log(`No streams found for seriesId: ${seriesId}, season: ${season}, episode: ${episode}`);
+        return res.status(404).json({ error: 'No streams found for this series' });
     }
 
-    console.log('Returning streams:', streams); // Debug log
-    res.json({ streams: streams });
+    console.log('Returning streams:', streams); // Debugging log
+    res.json({ streams });
 });
 
 
