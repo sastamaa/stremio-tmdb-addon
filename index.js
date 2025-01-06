@@ -164,24 +164,31 @@ app.get('/meta/series/tmdb-series-:id.json', async (req, res) => {
     console.log('Fetching meta data for series with ID:', id); // Debugging log
 
     try {
-        const seriesId = id.split('-')[2]; // Extract TMDB ID from the Stremio ID
+        // Extract TMDB ID from the Stremio ID
+        const seriesId = id.split('-')[2];
         console.log('Extracted TMDB ID:', seriesId); // Debugging log
 
+        // Fetch series details from TMDB
         const response = await axios.get(`https://api.themoviedb.org/3/tv/${seriesId}?api_key=${TMDB_API_KEY}`);
         console.log('TMDB API response:', response.data); // Debugging log
 
         const seriesData = response.data;
+
+        // Fetch season details
         const seasons = await Promise.all(
             seriesData.seasons.map(async (season) => {
+                console.log(`Fetching season ${season.season_number} for series ID: ${seriesId}`); // Debugging log
                 const seasonResponse = await axios.get(
                     `https://api.themoviedb.org/3/tv/${seriesId}/season/${season.season_number}?api_key=${TMDB_API_KEY}`
                 );
+                const seasonData = seasonResponse.data;
+
                 return {
                     season: season.season_number,
                     title: season.name,
                     overview: season.overview,
                     poster: `https://image.tmdb.org/t/p/w500${season.poster_path}`,
-                    episodes: seasonResponse.data.episodes.map(episode => ({
+                    episodes: seasonData.episodes.map(episode => ({
                         id: `tmdb-series-${seriesId}-s${season.season_number}e${episode.episode_number}`,
                         title: episode.name,
                         overview: episode.overview,
@@ -192,6 +199,7 @@ app.get('/meta/series/tmdb-series-:id.json', async (req, res) => {
             })
         );
 
+        // Construct the meta object for Stremio
         const meta = {
             id: `tmdb-series-${seriesData.id}`,
             type: 'series',
