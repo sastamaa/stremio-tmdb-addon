@@ -80,7 +80,7 @@ app.get('/catalog/movie/tmdb-movies.json', async (req, res) => {
 app.get('/meta/movie/tmdb-movie-:id.json', async (req, res) => {
     const { id } = req.params;
     try {
-        const movieId = id.split('-')[2];
+        const movieId = id;
         if (!movieId) return res.status(400).json({ error: 'Invalid movie ID format' });
 
         const movieData = await fetchFromTMDB(`https://api.themoviedb.org/3/movie/${movieId}?api_key=${TMDB_API_KEY}`);
@@ -152,7 +152,7 @@ app.get('/catalog/series/tmdb-series.json', async (req, res) => {
 app.get('/meta/series/tmdb-series-:id.json', async (req, res) => {
     const { id } = req.params;
     try {
-        const seriesId = id.split('-')[2];
+        const seriesId = id;
         if (!seriesId) return res.status(400).json({ error: 'Invalid series ID format' });
 
         const seriesData = await fetchFromTMDB(`https://api.themoviedb.org/3/tv/${seriesId}?api_key=${TMDB_API_KEY}`);
