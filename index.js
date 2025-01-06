@@ -196,61 +196,45 @@ app.get('/meta/series/tmdb-series-:id.json', async (req, res) => {
 
 app.get('/stream/series/tmdb-series-:id.json', (req, res) => {
     const { id } = req.params;
+    console.log('Fetching stream for series with ID:', id); // Debug log
 
-    // Log the received Stremio series ID
-    console.log('Fetching stream for series with ID:', id);
-
-    // Example streams data
-    const availableStreams = {
-        '60625-s1e1': {
-            title: 'Rick and Morty - S1E1',
-            url: 'https://example.com/rick-and-morty-s1e1.mp4',
-        },
-        '60625-s1e2': {
-            title: 'Rick and Morty - S1E2',
-            url: 'https://example.com/rick-and-morty-s1e2.mp4',
-        },
-        '966-s1e1': {
-            title: 'The Day of the Jackal - S1E1',
-            url: 'https://example.com/jackal-s1e1.mp4',
-        },
-        '966-s1e2': {
-            title: 'The Day of the Jackal - S1E2',
-            url: 'https://example.com/jackal-s1e2.mp4',
-        },
-    };
-
-    // Extract series ID and season/episode details from the provided Stremio ID
-    const matches = id.match(/(\d+)-s(\d+)e(\d+)/); // Regex to parse "60625-s1e1"
-    if (!matches) {
-        console.error('Invalid series ID format:', id);
+    const match = id.match(/^(.+)-s(\d+)e(\d+)$/); // Extract series ID, season, and episode
+    if (!match) {
         return res.status(400).json({ error: 'Invalid series ID format' });
     }
 
-    const [, seriesId, season, episode] = matches; // Extract TMDB ID, season, and episode
-    const key = `${seriesId}-s${season}e${episode}`;
+    const seriesId = match[1]; // e.g., "60625"
+    const season = match[2];  // e.g., "5"
+    const episode = match[3]; // e.g., "10"
 
-    console.log('Extracted series details:', { seriesId, season, episode });
-
-    // Check if a stream is available for the given key
-    if (availableStreams[key]) {
-        const stream = availableStreams[key];
-        res.json({
-            streams: [
-                {
-                    title: stream.title,
-                    url: stream.url, // Replace with your actual streaming link
-                    behaviorHints: {
-                        notWebReady: false,
-                    },
-                },
-            ],
+    // Example streaming links for specific episodes (use actual streaming links for production)
+    const streams = [];
+    if (seriesId === '60625') {
+        streams.push({
+            title: `Rick and Morty - S${1}E${1}`,
+            url: `https://ashdi.vip/video8/2/new/high.potential.s01e01.1080p.amzn.webdl.h.264.ukr.eng_151148/hls/1080/AqaXi3WGjuRfmhH2BA==/index.m3u8`,
+            behaviorHints: {
+                notWebReady: true,
+            }
         });
-    } else {
-        console.log('No stream found for key:', key);
-        res.json({ streams: [] }); // Return empty array if no stream is found
+    } else if (seriesId === '966') {
+        streams.push({
+            title: `The Day of the Jackal - S1E2`,
+            url: `https://ashdi.vip/video8/2/new/high.potential.s01e01.1080p.amzn.webdl.h.264.ukr.eng_151148/hls/1080/AqaXi3WGjuRfmhH2BA==/index.m3u8`,
+            behaviorHints: {
+                notWebReady: true,
+            }
+        });
     }
+
+    if (streams.length === 0) {
+        return res.status(404).json({ error: 'No streams found' });
+    }
+
+    console.log('Returning streams:', streams); // Debug log
+    res.json({ streams: streams });
 });
+
 
 
 // Start the server
