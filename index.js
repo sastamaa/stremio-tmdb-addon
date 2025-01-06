@@ -196,56 +196,62 @@ app.get('/meta/series/tmdb-series-:id.json', async (req, res) => {
 
 app.get('/stream/series/tmdb-series-:id.json', (req, res) => {
     const { id } = req.params;
-    console.log('Fetching stream for series with ID:', id); // Debugging log
+    console.log('Received ID:', id); // Debugging log for received ID
 
-    // Regex to validate and extract "tmdb-series-{seriesId}-s{season}e{episode}"
+    // Validate and extract details using a RegEx pattern
     const match = id.match(/^tmdb-series-(\d+)-s(\d+)e(\d+)$/);
     if (!match) {
+        console.error('Invalid ID format:', id); // Debugging log for invalid format
         return res.status(400).json({ error: 'Invalid series ID format' });
     }
 
-    // Extract TMDB Series ID, season, and episode
-    const seriesId = match[1];  // e.g., "60625" (Rick and Morty)
-    const season = match[2];   // e.g., "1"
-    const episode = match[3];  // e.g., "2"
+    // Extract series ID, season, and episode from the ID
+    const seriesId = match[1]; // TMDB Series ID
+    const season = match[2];  // Season Number
+    const episode = match[3]; // Episode Number
 
-    console.log(`Extracted seriesId: ${seriesId}, season: ${season}, episode: ${episode}`); // Debugging log
+    console.log(`Parsed seriesId: ${seriesId}, season: ${season}, episode: ${episode}`); // Debugging log
 
-    // Example: Add valid streams for episodes
+    // Add your streaming links for specific episodes
     const streams = [];
-    if (seriesId === '60625') { // Rick and Morty TMDB ID
-        if (season === '1' && episode === '2') { // Season 1, Episode 2
+
+    // Rick and Morty (TMDB Series ID: 60625)
+    if (seriesId === '60625') {
+        if (season === '1' && episode === '1') {
             streams.push({
-                title: `Rick and Morty - S1E2`,
-                url: `https://ashdi.vip/video8/2/new/high.potential.s01e01.1080p.amzn.webdl.h.264.ukr.eng_151148/hls/1080/AqaXi3WGjuRfmhH2BA==/index.m3u8`, // Replace with actual streaming link
-                behaviorHints: {
-                    notWebReady: false,
-                },
+                title: 'Rick and Morty - S1E1',
+                url: 'https://example.com/rickandmorty/s1e1.mp4',
+                behaviorHints: { notWebReady: false },
             });
-        }
-    } else if (seriesId === '966') { // The Day of the Jackal TMDB ID
-        if (season === '1' && episode === '1') { // Season 1, Episode 1
+        } else if (season === '1' && episode === '2') {
             streams.push({
-                title: `The Day of the Jackal - S${season}E${episode}`,
-                url: `https://example.com/jackal/s${season}e${episode}.mp4`, // Replace with actual streaming link
-                behaviorHints: {
-                    notWebReady: false,
-                },
+                title: 'Rick and Morty - S1E2',
+                url: 'https://example.com/rickandmorty/s1e2.mp4',
+                behaviorHints: { notWebReady: false },
             });
         }
     }
 
-    // Respond with streams or an error if no streams found
+    // The Day of the Jackal (TMDB Series ID: 966)
+    if (seriesId === '966') {
+        if (season === '1' && episode === '1') {
+            streams.push({
+                title: 'The Day of the Jackal - S1E1',
+                url: 'https://example.com/jackal/s1e1.mp4',
+                behaviorHints: { notWebReady: false },
+            });
+        }
+    }
+
+    // If no streams are found for the episode, return an error
     if (streams.length === 0) {
-        console.log(`No streams found for seriesId: ${seriesId}, season: ${season}, episode: ${episode}`);
-        return res.status(404).json({ error: 'No streams found for this series' });
+        console.error(`No streams found for seriesId: ${seriesId}, season: ${season}, episode: ${episode}`);
+        return res.status(404).json({ error: 'No streams found for this episode' });
     }
 
     console.log('Returning streams:', streams); // Debugging log
     res.json({ streams });
 });
-
-
 
 // Start the server
 app.listen(PORT, () => {
