@@ -117,7 +117,7 @@ app.get('/stream/movie/tmdb-movie-:id.json', (req, res) => {
         },
     };
 
-    const tmdbId = id.split('-')[2]; // Extract TMDB ID
+    const tmdbId = id; // Extract TMDB ID
     console.log('Fetching stream for TMDB ID:', tmdbId);
 
     if (availableStreams[tmdbId]) {
