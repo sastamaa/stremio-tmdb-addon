@@ -53,7 +53,7 @@ async function fetchFromTMDB(url) {
 // Catalog endpoint for movies
 app.get('/catalog/movie/tmdb-movies.json', async (req, res) => {
     try {
-        const movieIds = ['335983', '402431'];
+        const movieIds = ['335983', '402431', '1019404', '1108566', '840705', '114', '9489', '350', '8835'];
         const movies = await Promise.all(
             movieIds.map(async (id) => {
                 const movieData = await fetchFromTMDB(`https://api.themoviedb.org/3/movie/${id}?api_key=${TMDB_API_KEY}`);
@@ -117,6 +117,49 @@ app.get('/stream/movie/tmdb-movie-:id.json', (req, res) => {
         '402431': {
             title: 'Wicked',
             url: 'https://ashdi.vip/video17/2/new/the.shadow.strays.2024.ua.dub.tak.treba.prodakshn_146773/hls/1080/DaqXjXWRkeBYhA37BA==/index.m3u8', // Replace with actual links
+            "behaviorHints": {
+        "notWebReady": false
+    }
+        },
+        '1019404': {
+            title: 'Оса',
+            url: 'https://ashdi.vip/video17/1/new/the.wasp.2024.ua.mvo.megogo.voice_155425/hls/1080/DaqXjXWRkeBYhA37BA==/index.m3u8', // Replace with actual links
+            "behaviorHints": {
+        "notWebReady": false
+    }
+        },'1108566': {
+            title: 'Вбивча спека',
+            url: 'https://ashdi.vip/video17/2/new/killer.heat.2024.1080p.amzn.webdl.aac2.0.h.264utopia_145019/hls/480/DaqXjXWRkeBYhA37BA==/index.m3u8', // Replace with actual links
+            "behaviorHints": {
+        "notWebReady": false
+    }
+        },'840705': {
+            title: 'Кліпни двічі',
+            url: 'https://ashdi.vip/video11/2/new/blink.twice.2024.ua_142368/hls/1080/AqaXi3WGjuRekxH2AQ==/index.m3u8', // Replace with actual links
+            "behaviorHints": {
+        "notWebReady": false
+    }
+        },'9489': {
+            title: 'Вам лист',
+            url: 'https://s1.hdvbua.pro/media/content/stream/films/youve_got_mail_1998_bdrip_1080p_39534/hls/1080/index.m3u8', // Replace with actual links
+            "behaviorHints": {
+        "notWebReady": false
+    }
+        },'350': {
+            title: 'Диявол носить «Прада',
+            url: 'https://s1.hdvbua.pro/media/content/stream/films/the_devil_wears_prada_2006_webdlrip720p_open_matte_16954/hls/720/index.m3u8', // Replace with actual links
+            "behaviorHints": {
+        "notWebReady": false
+    }
+        },'114': {
+            title: 'Красуня',
+            url: 'https://s1.hdvbua.pro/media1/content/stream/new/pretty_woman_1990_bdrip_1080p_h.265_55570/hls/1080/index.m3u8', // Replace with actual links
+            "behaviorHints": {
+        "notWebReady": false
+    }
+        },'8835': {
+            title: 'Білявка в законі',
+            url: 'https://ashdi.vip/video17/2/films/legally_blonde_2001_bdrip_1080p_4xukr_eng_hurtom_99178/hls/480/DaqXjXWRkeBYhA37BA==/index.m3u8', // Replace with actual links
             "behaviorHints": {
         "notWebReady": false
     }
