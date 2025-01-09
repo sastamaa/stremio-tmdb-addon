@@ -217,9 +217,15 @@ app.get('/meta/series/:id.json', async (req, res) => {
     const { id } = req.params;
     console.log(`Fetching metadata for series with ID: ${id}`); // Debugging log
 
+    if (!id || !/^\d+$/.test(id)) {
+        return res.status(400).json({ error: "Invalid series ID format" });
+    }
+
     try {
-        // Fetch series details from TMDb
-        const seriesResponse = await axios.get(`https://api.themoviedb.org/3/tv/${id}?api_key=${TMDB_API_KEY}`);
+        // Fetch series details from TMDB
+        const seriesResponse = await axios.get(
+            `https://api.themoviedb.org/3/tv/${id}?api_key=${TMDB_API_KEY}`
+        );
         const seriesData = seriesResponse.data;
 
         // Fetch season details
@@ -232,15 +238,15 @@ app.get('/meta/series/:id.json', async (req, res) => {
 
                 return {
                     id: `tmdb-series-${id}-s${season.season_number}`,
-                    title: season.name,
+                    title: season.name || `Season ${season.season_number}`,
                     episodes: seasonData.episodes.map((episode) => ({
                         id: `tmdb-series-${id}-s${season.season_number}e${episode.episode_number}`,
                         title: episode.name,
                         season: season.season_number,
                         episode: episode.episode_number,
                         released: episode.air_date,
-                        overview: episode.overview
-                    }))
+                        overview: episode.overview,
+                    })),
                 };
             })
         );
@@ -254,7 +260,7 @@ app.get('/meta/series/:id.json', async (req, res) => {
             description: seriesData.overview,
             releaseInfo: seriesData.first_air_date,
             genres: seriesData.genres.map((genre) => genre.name),
-            seasons
+            seasons,
         };
 
         console.log('Returning metadata for series:', meta); // Debugging log
@@ -264,6 +270,7 @@ app.get('/meta/series/:id.json', async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch metadata' });
     }
 });
+
 
 app.get('/stream/series/:id.json', (req, res) => {
     const id = req.params.id;
