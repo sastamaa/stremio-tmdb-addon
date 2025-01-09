@@ -216,40 +216,51 @@ app.get('/catalog/series/tmdb-series.json', async (req, res) => {
 app.get('/meta/series/tmdb-series-:id.json', async (req, res) => {
     const { id } = req.params;
 
-    try {
-        if (!id) {
-            return res.status(400).json({ error: 'Invalid series ID format' });
-        }
+    if (!id) {
+        return res.status(400).json({ error: 'Invalid series ID format' });
+    }
 
+    try {
         // Fetch series details from TMDB
         const seriesResponse = await axios.get(
             `https://api.themoviedb.org/3/tv/${id}?api_key=${TMDB_API_KEY}`
         );
+
+        if (seriesResponse.status !== 200 || !seriesResponse.data) {
+            console.error(`Error fetching series metadata: Invalid response for series ID ${id}`);
+            return res.status(500).json({ error: 'Failed to fetch series metadata' });
+        }
+
         const seriesData = seriesResponse.data;
 
-        // Construct metadata for seasons and episodes
-        const seasons = seriesData.seasons.map((season) => ({
-            id: `tmdb-series-${id}-s${season.season_number}`,
-            title: season.name || `Season ${season.season_number}`,
-        }));
+        // Construct metadata
+        const seasons = seriesData.seasons
+            ? seriesData.seasons.map((season) => ({
+                  id: `tmdb-series-${id}-s${season.season_number}`,
+                  title: season.name || `Season ${season.season_number}`,
+              }))
+            : [];
 
         const meta = {
             id: `tmdb-series-${seriesData.id}`,
             type: 'series',
-            name: seriesData.name,
+            name: seriesData.name || 'Unknown Series',
             poster: seriesData.poster_path
                 ? `https://image.tmdb.org/t/p/w500${seriesData.poster_path}`
                 : null,
-            description: seriesData.overview,
-            releaseInfo: seriesData.first_air_date,
-            genres: seriesData.genres.map((genre) => genre.name),
+            description: seriesData.overview || 'No description available.',
+            releaseInfo: seriesData.first_air_date || 'Unknown Release Date',
+            genres: seriesData.genres?.map((genre) => genre.name) || [],
             seasons,
         };
 
         res.json({ meta });
     } catch (error) {
-        console.error('Error fetching series metadata:', error.message);
-        res.status(500).json({ error: 'Failed to fetch series metadata' });
+        console.error(`Error fetching metadata for series ID ${id}:`, error.message);
+        res.status(500).json({
+            error: 'An error occurred while fetching series metadata.',
+            details: error.message,
+        });
     }
 });
 
@@ -258,40 +269,41 @@ app.get('/meta/series/tmdb-series-:id.json', async (req, res) => {
 app.get('/stream/series/tmdb-series-:id.json', (req, res) => {
     const { id } = req.params;
 
-    // Example stream data for demo purposes
-    const availableStreams = {
-        '60625-s1e2': {
-            title: 'Rick and Morty S1E2',
-            url: 'https://example.com/rick-and-morty-s1e2.m3u8', // Replace with an actual link
-            behaviorHints: { notWebReady: false },
-        },
-        '60625-s1e3': {
-            title: 'Rick and Morty S1E3',
-            url: 'https://example.com/rick-and-morty-s1e3.m3u8', // Replace with an actual link
-            behaviorHints: { notWebReady: false },
-        },
-        '60625-s2e1': {
-            title: 'Rick and Morty S2E1',
-            url: 'https://example.com/rick-and-morty-s2e1.m3u8', // Replace with an actual link
-            behaviorHints: { notWebReady: false },
-        },
-    };
+    if (!id || !/^[\d]+-s\d+e\d+$/.test(id)) {
+        console.error(`Invalid series ID format: ${id}`);
+        return res.status(400).json({ error: 'Invalid series ID format' });
+    }
 
-    console.log('Fetching stream for series episode:', id);
+    try {
+        const availableStreams = {
+            '60625-s1e2': {
+                title: 'Rick and Morty S1E2',
+                url: 'https://example.com/rick-and-morty-s1e2.m3u8',
+                behaviorHints: { notWebReady: false },
+            },
+        };
 
-    if (availableStreams[id]) {
-        const stream = availableStreams[id];
-        res.json({
-            streams: [
-                {
-                    title: stream.title,
-                    url: stream.url,
-                    behaviorHints: stream.behaviorHints,
-                },
-            ],
+        if (availableStreams[id]) {
+            const stream = availableStreams[id];
+            res.json({
+                streams: [
+                    {
+                        title: stream.title,
+                        url: stream.url,
+                        behaviorHints: stream.behaviorHints,
+                    },
+                ],
+            });
+        } else {
+            console.warn(`No streams found for ID: ${id}`);
+            res.json({ streams: [] });
+        }
+    } catch (error) {
+        console.error(`Error fetching stream for series ID ${id}:`, error.message);
+        res.status(500).json({
+            error: 'An error occurred while fetching the stream.',
+            details: error.message,
         });
-    } else {
-        res.json({ streams: [] });
     }
 });
 
