@@ -266,72 +266,51 @@ app.get('/meta/series/:id.json', async (req, res) => {
 });
 
 app.get('/stream/series/:id.json', (req, res) => {
-    const { id } = req.params;
+    const id = req.params.id;
 
-    console.log(`Request received from Stremio for series stream ID: ${id}`);
-
-
-    // Match TMDb format (e.g., 60625-s1e2)
-    const tmdbMatch = id.match(/^(\d+)-s(\d+)e(\d+)$/);
-    if (tmdbMatch) {
-        const seriesId = tmdbMatch[1];
-        const season = tmdbMatch[2];
-        const episode = tmdbMatch[3];
-
-        console.log(`Parsed TMDb ID: ${seriesId}, season: ${season}, episode: ${episode}`);
-
-        const streams = [];
-
-        // Example: Rick and Morty
-        if (seriesId === '60625' && season === '1' && episode === '2') {
-            streams.push({
-                title: 'Rick and Morty - S1E2',
-                url: '"https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4"',
-                behaviorHints: { notWebReady: false },
-            });
-        }
-
-        if (streams.length === 0) {
-            console.log('No streams found for TMDb format:', { seriesId, season, episode });
-            return res.json({ streams }); // Send empty streams response
-        }
-
-        console.log('Returning streams:', streams);
-        return res.json({ streams });
+    // Validate the ID format
+    const match = id.match(/^tmdb-series-(\d+)-s(\d+)e(\d+)$/);
+    if (!match) {
+        console.error(`Invalid ID format: ${id}`);
+        res.status(400).json({ error: "Invalid series ID format" });
+        return;
     }
 
-    // Match IMDb-like format (e.g., tt3006802:1:2)
-    const imdbMatch = id.match(/^tt\d+:(\d+):(\d+)$/);
-    if (imdbMatch) {
-        const season = imdbMatch[1];
-        const episode = imdbMatch[2];
+    // Extract the TMDB ID, season number, and episode number
+    const [, tmdbId, season, episode] = match;
+    console.log(`Stream request for TMDB ID: ${tmdbId}, Season: ${season}, Episode: ${episode}`);
 
-        console.log(`Parsed IMDb format, season: ${season}, episode: ${episode}`);
-
-        const streams = [];
-
-        // Example: Rick and Morty (IMDb)
-        if (id.startsWith('tt3006802') && season === '1' && episode === '2') {
-            streams.push({
-                title: 'Rick and Morty - S1E2',
-                url: '"https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4"',
-                behaviorHints: { notWebReady: false },
-            });
+    // Define example streams
+    const exampleStreams = {
+        "60625-s1e2": {
+            title: "Rick and Morty S1E2 - Lawnmower Dog",
+            url: "http://example.com/streams/rick-and-morty-s1e2.mp4",
+            behaviorHints: {
+                notWebReady: true
+            }
+        },
+        "12345-s1e1": {
+            title: "The Day of the Jackal S1E1",
+            url: "http://example.com/streams/the-day-of-the-jackal-s1e1.mp4",
+            behaviorHints: {
+                notWebReady: true
+            }
         }
+    };
 
-        if (streams.length === 0) {
-            console.log('No streams found for IMDb format:', { season, episode });
-            return res.json({ streams }); // Send empty streams response
-        }
+    // Compose the key to find the specific stream
+    const streamKey = `${tmdbId}-s${season}e${episode}`;
 
-        console.log('Returning streams:', streams);
-        return res.json({ streams });
+    // Find the corresponding stream
+    if (exampleStreams[streamKey]) {
+        res.json({
+            streams: [exampleStreams[streamKey]]
+        });
+    } else {
+        console.error(`No stream found for: ${streamKey}`);
+        res.status(404).json({ streams: [] });
     }
-
-    console.error('Invalid series ID format:', id);
-    res.status(400).json({ error: 'Invalid series ID format' });
 });
-
 
 
 // Start the server
