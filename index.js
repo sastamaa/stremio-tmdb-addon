@@ -213,111 +213,88 @@ app.get('/catalog/series/tmdb-series.json', async (req, res) => {
 });
 
 // Meta endpoint for series
-app.get('/meta/series/:id.json', async (req, res) => {
+app.get('/meta/series/tmdb-series-:id.json', async (req, res) => {
     const { id } = req.params;
-    console.log(`Fetching metadata for series with ID: ${id}`); // Debugging log
-
-    if (!id || !/^\d+$/.test(id)) {
-        return res.status(400).json({ error: "Invalid series ID format" });
-    }
 
     try {
+        if (!id) {
+            return res.status(400).json({ error: 'Invalid series ID format' });
+        }
+
         // Fetch series details from TMDB
         const seriesResponse = await axios.get(
             `https://api.themoviedb.org/3/tv/${id}?api_key=${TMDB_API_KEY}`
         );
         const seriesData = seriesResponse.data;
 
-        // Fetch season details
-        const seasons = await Promise.all(
-            seriesData.seasons.map(async (season) => {
-                const seasonResponse = await axios.get(
-                    `https://api.themoviedb.org/3/tv/${id}/season/${season.season_number}?api_key=${TMDB_API_KEY}`
-                );
-                const seasonData = seasonResponse.data;
+        // Construct metadata for seasons and episodes
+        const seasons = seriesData.seasons.map((season) => ({
+            id: `tmdb-series-${id}-s${season.season_number}`,
+            title: season.name || `Season ${season.season_number}`,
+        }));
 
-                return {
-                    id: `tmdb-series-${id}-s${season.season_number}`,
-                    title: season.name || `Season ${season.season_number}`,
-                    episodes: seasonData.episodes.map((episode) => ({
-                        id: `tmdb-series-${id}-s${season.season_number}e${episode.episode_number}`,
-                        title: episode.name,
-                        season: season.season_number,
-                        episode: episode.episode_number,
-                        released: episode.air_date,
-                        overview: episode.overview,
-                    })),
-                };
-            })
-        );
-
-        // Construct metadata object
         const meta = {
             id: `tmdb-series-${seriesData.id}`,
             type: 'series',
             name: seriesData.name,
-            poster: `https://image.tmdb.org/t/p/w500${seriesData.poster_path}`,
+            poster: seriesData.poster_path
+                ? `https://image.tmdb.org/t/p/w500${seriesData.poster_path}`
+                : null,
             description: seriesData.overview,
             releaseInfo: seriesData.first_air_date,
             genres: seriesData.genres.map((genre) => genre.name),
             seasons,
         };
 
-        console.log('Returning metadata for series:', meta); // Debugging log
         res.json({ meta });
     } catch (error) {
-        console.error(`Error fetching metadata for series with ID ${id}:`, error.message);
-        res.status(500).json({ error: 'Failed to fetch metadata' });
+        console.error('Error fetching series metadata:', error.message);
+        res.status(500).json({ error: 'Failed to fetch series metadata' });
     }
 });
 
 
-app.get('/stream/series/:id.json', (req, res) => {
-    const id = req.params.id;
+// Stream endpoint for series
+app.get('/stream/series/tmdb-series-:id.json', (req, res) => {
+    const { id } = req.params;
 
-    // Validate the ID format
-    const match = id.match(/^tmdb-series-(\d+)-s(\d+)e(\d+)$/);
-    if (!match) {
-        console.error(`Invalid ID format: ${id}`);
-        res.status(400).json({ error: "Invalid series ID format" });
-        return;
-    }
-
-    // Extract the TMDB ID, season number, and episode number
-    const [, tmdbId, season, episode] = match;
-    console.log(`Stream request for TMDB ID: ${tmdbId}, Season: ${season}, Episode: ${episode}`);
-
-    // Define example streams
-    const exampleStreams = {
-        "60625-s1e2": {
-            title: "Rick and Morty S1E2 - Lawnmower Dog",
-            url: "http://example.com/streams/rick-and-morty-s1e2.mp4",
-            behaviorHints: {
-                notWebReady: true
-            }
+    // Example stream data for demo purposes
+    const availableStreams = {
+        '60625-s1e2': {
+            title: 'Rick and Morty S1E2',
+            url: 'https://example.com/rick-and-morty-s1e2.m3u8', // Replace with an actual link
+            behaviorHints: { notWebReady: false },
         },
-        "12345-s1e1": {
-            title: "The Day of the Jackal S1E1",
-            url: "http://example.com/streams/the-day-of-the-jackal-s1e1.mp4",
-            behaviorHints: {
-                notWebReady: true
-            }
-        }
+        '60625-s1e3': {
+            title: 'Rick and Morty S1E3',
+            url: 'https://example.com/rick-and-morty-s1e3.m3u8', // Replace with an actual link
+            behaviorHints: { notWebReady: false },
+        },
+        '60625-s2e1': {
+            title: 'Rick and Morty S2E1',
+            url: 'https://example.com/rick-and-morty-s2e1.m3u8', // Replace with an actual link
+            behaviorHints: { notWebReady: false },
+        },
     };
 
-    // Compose the key to find the specific stream
-    const streamKey = `${tmdbId}-s${season}e${episode}`;
+    console.log('Fetching stream for series episode:', id);
 
-    // Find the corresponding stream
-    if (exampleStreams[streamKey]) {
+    if (availableStreams[id]) {
+        const stream = availableStreams[id];
         res.json({
-            streams: [exampleStreams[streamKey]]
+            streams: [
+                {
+                    title: stream.title,
+                    url: stream.url,
+                    behaviorHints: stream.behaviorHints,
+                },
+            ],
         });
     } else {
-        console.error(`No stream found for: ${streamKey}`);
-        res.status(404).json({ streams: [] });
+        res.json({ streams: [] });
     }
 });
+
 
 
 // Start the server
