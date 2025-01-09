@@ -240,7 +240,8 @@ app.get('/meta/series/tmdb-series-:id.json', async (req, res) => {
 app.get('/stream/series/:id.json', (req, res) => {
     const { id } = req.params;
 
-    console.log('Received stream request for series:', id);
+    console.log(`Request received from Stremio for series stream ID: ${id}`);
+
 
     // Match TMDb format (e.g., 60625-s1e2)
     const tmdbMatch = id.match(/^(\d+)-s(\d+)e(\d+)$/);
