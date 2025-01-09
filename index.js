@@ -237,38 +237,72 @@ app.get('/meta/series/tmdb-series-:id.json', async (req, res) => {
     }
 });
 
-app.get('/stream/series/tmdb-series-:id.json', (req, res) => {
+app.get('/stream/series/:id.json', (req, res) => {
     const { id } = req.params;
-    console.log('Fetching stream for series with ID:', id); // Debugging log
 
-    // Extract series ID, season, and episode number from the ID
-    const [seriesId, seasonEpisode] = id.split('-s');
-    const [season, episode] = seasonEpisode.split('e');
+    console.log('Received stream request for series:', id);
 
-    const streams = [];
-    if (seriesId === 'tmdb-series-222766') {
-        // Streaming link for "The Day of the Jackal"
-        streams.push({
-            title: `The Day of the Jackal - S1E1`,
-            url: 'https://ashdi.vip/video8/2/new/s_1_ep_6_151559/hls/1080/AqaXi3WGjuRfmhH2BA==/index.m3u8', // Replace with actual streaming link for "The Day of the Jackal"
-            behaviorHints: {
-                notWebReady: true,
-            }
-        });
-    } else if (seriesId === 'tmdb-series-60625') {
-        // Streaming link for "Rick and Morty"
-        streams.push({
-            title: `Rick and Morty - S1E1`,
-            url: 'https://ashdi.vip/video8/2/new/s_1_ep_6_151559/hls/1080/AqaXi3WGjuRfmhH2BA==/index.m3u8', // Replace with actual streaming link for "Rick and Morty"
-            behaviorHints: {
-                notWebReady: false,
-            }
-        });
+    // Match TMDb format (e.g., 60625-s1e2)
+    const tmdbMatch = id.match(/^(\d+)-s(\d+)e(\d+)$/);
+    if (tmdbMatch) {
+        const seriesId = tmdbMatch[1];
+        const season = tmdbMatch[2];
+        const episode = tmdbMatch[3];
+
+        console.log(`Parsed TMDb ID: ${seriesId}, season: ${season}, episode: ${episode}`);
+
+        const streams = [];
+
+        // Example: Rick and Morty
+        if (seriesId === '60625' && season === '1' && episode === '2') {
+            streams.push({
+                title: 'Rick and Morty - S1E2',
+                url: '"https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4"',
+                behaviorHints: { notWebReady: false },
+            });
+        }
+
+        if (streams.length === 0) {
+            console.log('No streams found for TMDb format:', { seriesId, season, episode });
+            return res.json({ streams }); // Send empty streams response
+        }
+
+        console.log('Returning streams:', streams);
+        return res.json({ streams });
     }
 
-    console.log('Returning streams:', streams); // Debugging log
-    res.json({ streams: streams });
+    // Match IMDb-like format (e.g., tt3006802:1:2)
+    const imdbMatch = id.match(/^tt\d+:(\d+):(\d+)$/);
+    if (imdbMatch) {
+        const season = imdbMatch[1];
+        const episode = imdbMatch[2];
+
+        console.log(`Parsed IMDb format, season: ${season}, episode: ${episode}`);
+
+        const streams = [];
+
+        // Example: Rick and Morty (IMDb)
+        if (id.startsWith('tt3006802') && season === '1' && episode === '2') {
+            streams.push({
+                title: 'Rick and Morty - S1E2',
+                url: '"https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4"',
+                behaviorHints: { notWebReady: false },
+            });
+        }
+
+        if (streams.length === 0) {
+            console.log('No streams found for IMDb format:', { season, episode });
+            return res.json({ streams }); // Send empty streams response
+        }
+
+        console.log('Returning streams:', streams);
+        return res.json({ streams });
+    }
+
+    console.error('Invalid series ID format:', id);
+    res.status(400).json({ error: 'Invalid series ID format' });
 });
+
 
 
 // Start the server
