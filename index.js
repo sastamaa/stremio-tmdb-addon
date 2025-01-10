@@ -128,7 +128,7 @@ app.get('/meta/movie/tmdb-movie-:id.json', async (req, res) => {
             type: 'movie',
             name: movieData.title,
             poster: movieData.poster_path ? `https://image.tmdb.org/t/p/w500${movieData.poster_path}` : null,
-            background: movieData.backdrop_path ? `https://image.tmdb.org/t/p/w500${movieData.backdrop_path}` : null,
+            background: movieData.backdrop_path ? `https://image.tmdb.org/t/p/w1280${movieData.backdrop_path}` : null,
             description: movieData.overview,
             releaseInfo: movieData.release_date?.split('-')[0], // Extract the year
             genres: movieData.genres.map((genre) => genre.name),
@@ -301,7 +301,7 @@ app.get("/meta/series/:id.json", async (req, res) => {
             type: "series",
             name: seriesData.name,
             poster: seriesData.poster_path ? `https://image.tmdb.org/t/p/w500${seriesData.poster_path}` : null,
-            background: seriesData.backdrop_path ? `https://image.tmdb.org/t/p/w500${seriesData.backdrop_path}` : null,
+            background: seriesData.backdrop_path ? `https://image.tmdb.org/t/p/w1280${seriesData.backdrop_path}` : null,
             description: seriesData.overview,
             releaseInfo: seriesData.first_air_date?.split("-")[0], // Extract the year
             genres: seriesData.genres.map((genre) => genre.name),
