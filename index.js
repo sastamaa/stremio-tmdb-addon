@@ -317,25 +317,25 @@ app.get("/meta/series/:id.json", async (req, res) => {
 });
 
 
-// Stream endpoint for series
+// Stream endpoint for series episodes
 app.get('/stream/series/tmdb-series-:id.json', (req, res) => {
     const { id } = req.params;
 
     // Example stream data for demo purposes
     const availableStreams = {
-        '60625-s1e2': {
+        'tmdb-series-60625-s1e2': { // Include 'tmdb-series-' prefix
             title: 'Rick and Morty S1E2',
-            url: 'https://s1.hdvbua.pro/media/content/stream/serials/rick.and.morty.s01e02_1728/hls/720/index.m3u8', // Replace with an actual link
+            url: 'https://s1.hdvbua.pro/media/content/stream/serials/rick.and.morty.s01e02_1728/hls/720/index.m3u8',
             behaviorHints: { notWebReady: false },
         },
-        '60625-s1e3': {
+        'tmdb-series-60625-s1e3': {
             title: 'Rick and Morty S1E3',
-            url: 'https://s1.hdvbua.pro/media/content/stream/serials/rick.and.morty.s01e03_1729/hls/720/index.m3u8', // Replace with an actual link
+            url: 'https://s1.hdvbua.pro/media/content/stream/serials/rick.and.morty.s01e03_1729/hls/720/index.m3u8',
             behaviorHints: { notWebReady: false },
         },
-        '60625-s2e1': {
+        'tmdb-series-60625-s2e1': {
             title: 'Rick and Morty S2E1',
-            url: 'https://s1.hdvbua.pro/media/content/stream/serials/rick.and.morty.s01e03_1729/hls/720/index.m3u8', // Replace with an actual link
+            url: 'https://s1.hdvbua.pro/media/content/stream/serials/rick.and.morty.s02e01_1730/hls/720/index.m3u8',
             behaviorHints: { notWebReady: false },
         },
     };
@@ -357,8 +357,6 @@ app.get('/stream/series/tmdb-series-:id.json', (req, res) => {
         res.json({ streams: [] });
     }
 });
-
-
 
 // Start the server
 app.listen(PORT, () => {
