@@ -267,25 +267,33 @@ app.get('/meta/series/tmdb-series-:id.json', async (req, res) => {
     const { id } = req.params;
 
     try {
-        const seriesData = await fetchFromTMDB(`https://api.themoviedb.org/3/tv/${id}`);
-        const seasons = seriesData.seasons.map((season) => {
-            if (season.season_number === 0) return null; // Exclude specials
-            return {
+        const seriesData = await fetchFromTMDB(`https://api.themoviedb.org/3/tv/${id}?api_key=${TMDB_API_KEY}`);
+        const seasons = [];
+
+        // Fetch episode details for each season
+        for (const season of seriesData.seasons) {
+            if (season.season_number === 0) continue; // Skip specials
+
+            const seasonData = await fetchFromTMDB(
+                `https://api.themoviedb.org/3/tv/${id}/season/${season.season_number}?api_key=${TMDB_API_KEY}`
+            );
+
+            const episodes = seasonData.episodes.map((episode) => ({
+                id: `tmdb-series-${id}-s${season.season_number}e${episode.episode_number}`,
+                title: episode.name || `Епізод ${episode.episode_number}`,
+                season: season.season_number,
+                episode: episode.episode_number,
+                released: episode.air_date,
+                overview: episode.overview || '',
+                thumbnail: episode.still_path ? `https://image.tmdb.org/t/p/w500${episode.still_path}` : null,
+            }));
+
+            seasons.push({
                 id: `tmdb-series-${id}-s${season.season_number}`,
                 title: season.name || `Сезон ${season.season_number}`,
-                episodes: season.episodes.map((episode) => ({
-                    id: `tmdb-series-${id}-s${season.season_number}e${episode.episode_number}`,
-                    title: episode.name || `Епізод ${episode.episode_number}`,
-                    season: season.season_number,
-                    episode: episode.episode_number,
-                    released: episode.air_date,
-                    overview: episode.overview || "",
-                    thumbnail: episode.still_path ? `https://image.tmdb.org/t/p/w500${episode.still_path}` : null,
-                })),
-            };
-        });
-
-        const filteredSeasons = seasons.filter(season => season !== null);
+                episodes,
+            });
+        }
 
         const meta = {
             id: `tmdb-series-${id}`,
@@ -295,28 +303,29 @@ app.get('/meta/series/tmdb-series-:id.json', async (req, res) => {
             background: seriesData.backdrop_path ? `https://image.tmdb.org/t/p/w1280${seriesData.backdrop_path}` : null,
             description: seriesData.overview,
             releaseInfo: seriesData.first_air_date?.split('-')[0],
-            genres: seriesData.genres.map(genre => genre.name),
-            seasons: filteredSeasons,
+            genres: seriesData.genres.map((genre) => genre.name),
+            seasons,
         };
 
         res.json({ meta });
     } catch (error) {
-        console.error('Error fetching meta data for series:', error);
-        res.status(500).json({ error: 'Failed to fetch series meta data' });
+        console.error('Error fetching metadata for series:', error.message);
+        res.status(500).json({ error: 'Failed to fetch metadata for the series' });
     }
 });
 
+
 // Stream endpoint for series
-app.get('/stream/series/tmdb-series-:id.json', (req, res) => {
+app.get('/stream/series/:id.json', (req, res) => {
     const { id } = req.params;
 
     const availableStreams = {
         'tmdb-series-60625-s1e2': {
             title: 'Rick and Morty S1E2',
-            url: 'https://example.com/stream/s1e2', // Replace with actual stream URL
+            url: 'https://example.com/stream/s1e2', // Replace with your actual stream URL
             behaviorHints: { notWebReady: false },
         },
-        // Add other streams as needed
+        // Add streams dynamically or fetch them from your database
     };
 
     if (availableStreams[id]) {
@@ -331,9 +340,10 @@ app.get('/stream/series/tmdb-series-:id.json', (req, res) => {
             ],
         });
     } else {
-        res.json({ streams: [] });
+        res.json({ streams: [] }); // No stream found
     }
 });
+
 
 // Start the server
 app.listen(PORT, () => {
