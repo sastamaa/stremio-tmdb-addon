@@ -278,17 +278,15 @@ app.get('/meta/series/tmdb-series-:id.json', async (req, res) => {
                 `https://api.themoviedb.org/3/tv/${id}/season/${season.season_number}?api_key=${TMDB_API_KEY}`
             );
 
-           const episodes = season.episodes.map((episode) => ({
-    id: `tmdb-series-${id}-s${season.season_number}e${episode.episode_number}`, // Simplified ID
-    title: episode.name || `Епізод ${episode.episode_number}`,
-    season: season.season_number,
-    episode: episode.episode_number,
-    released: episode.air_date,
-    overview: episode.overview || '',
-    thumbnail: episode.still_path
-        ? `https://image.tmdb.org/t/p/w500${episode.still_path}`
-        : null,
-}));
+            const episodes = seasonData.episodes.map((episode) => ({
+                id: `tmdb-series-${id}-s${season.season_number}e${episode.episode_number}`,
+                title: episode.name || `Епізод ${episode.episode_number}`,
+                season: season.season_number,
+                episode: episode.episode_number,
+                released: episode.air_date,
+                overview: episode.overview || '',
+                thumbnail: episode.still_path ? `https://image.tmdb.org/t/p/w500${episode.still_path}` : null,
+            }));
 
             seasons.push({
                 id: `tmdb-series-${id}-s${season.season_number}`,
