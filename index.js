@@ -71,7 +71,7 @@ async function fetchFromTMDB(endpoint) {
 // Catalog endpoint for movies
 app.get('/catalog/movie/tmdb-movies.json', async (req, res) => {
     try {
-        const movieIds = ['585083', '616747', '1019404', '1108566', '840705', '114', '9489', '350', '8835', '545611', '519182', '1014590'];
+        const movieIds = ['402431', '585083', '616747', '1019404', '1108566', '840705', '114', '9489', '350', '8835', '545611', '519182', '1014590'];
         const movies = await Promise.all(
             movieIds.map(async (id) => {
                 const movieData = await fetchFromTMDB(`https://api.themoviedb.org/3/movie/${id}`);
@@ -127,6 +127,13 @@ app.get('/meta/movie/tmdb-movie-:id.json', async (req, res) => {
 
                 // Example data for demo purposes
                 const availableStreams = {
+                     '402431': {
+                        title: 'Wicked',
+                        url: 'https://crimson.stream.voidboost.cc/f18d2a0f3747324bffb1be571730f97e:2025011118:ejRNbWM5Uk5idkhTZTA5U05tRTEzREx6WWdWM0dIengvbWdqNGRaU3NkMCsxVTBaVHhXTzJzNkQ0MjhwY3B2Z0ppbDcwY3FFeUI4allQejdqVDVoTWc9PQ==/1/1/9/2/6/1/3/4ljwr.mp4:hls:manifest.m3u8', // Replace with actual links
+                        "behaviorHints": {
+                            "notWebReady": false
+                        }
+                    },
                     '585083': {
                         title: 'Монстри на канікулах: Трансформанія',
                         url: 'https://s1.hdvbua.pro/media1/content/stream/films/hotel_transylvania_transformania_2022_webrip_1080p_83600/hls/1080/index.m3u8', // Replace with actual links
