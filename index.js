@@ -290,7 +290,7 @@ app.get('/meta/series/tmdb-series-:id.json', async (req, res) => {
             const meta = {
                 id: `tmdb-series-${seriesId}-s${seasonNumber}e${episodeNumber}`,
                 type: 'series',
-                name: episode.name || `Епізод ${episodeNumber}`,
+                name: episode.name || `Episode ${episodeNumber}`,
                 poster: episode.still_path
                     ? `https://image.tmdb.org/t/p/w500${episode.still_path}`
                     : null,
@@ -314,7 +314,7 @@ app.get('/meta/series/tmdb-series-:id.json', async (req, res) => {
 
             const episodes = seasonDetails.episodes.map((ep) => ({
                 id: `tmdb-series-${seriesId}-s${seasonNumber}e${ep.episode_number}`,
-                title: ep.name || `Епізод ${ep.episode_number}`,
+                title: ep.name || `Episode ${ep.episode_number}`,
                 season: seasonNumber,
                 episode: ep.episode_number,
                 released: ep.air_date || null,
@@ -327,7 +327,7 @@ app.get('/meta/series/tmdb-series-:id.json', async (req, res) => {
             const meta = {
                 id: `tmdb-series-${seriesId}-s${seasonNumber}`,
                 type: 'series',
-                name: seasonDetails.name || `Сезон ${seasonNumber}`,
+                name: seasonDetails.name || `Season ${seasonNumber}`,
                 poster: seasonDetails.poster_path
                     ? `https://image.tmdb.org/t/p/w500${seasonDetails.poster_path}`
                     : null,
@@ -337,7 +337,7 @@ app.get('/meta/series/tmdb-series-:id.json', async (req, res) => {
                 description: seasonDetails.overview || '',
                 releaseInfo: seasonDetails.air_date || '',
                 genres: [], // Typically per series; might not apply per season
-                episodes,
+                videos: episodes, // Use `videos` instead of `episodes` for Stremio compatibility
             };
 
             return res.json({ meta });
@@ -351,10 +351,10 @@ app.get('/meta/series/tmdb-series-:id.json', async (req, res) => {
             );
             return {
                 id: `tmdb-series-${seriesId}-s${season.season_number}`,
-                title: season.name || `Сезон ${season.season_number}`,
+                title: season.name || `Season ${season.season_number}`,
                 episodes: seasonDetails.episodes.map((ep) => ({
                     id: `tmdb-series-${seriesId}-s${season.season_number}e${ep.episode_number}`,
-                    title: ep.name || `Епізод ${ep.episode_number}`,
+                    title: ep.name || `Episode ${ep.episode_number}`,
                     season: season.season_number,
                     episode: ep.episode_number,
                     released: ep.air_date || null,
@@ -367,6 +367,9 @@ app.get('/meta/series/tmdb-series-:id.json', async (req, res) => {
         });
 
         const seasons = await Promise.all(seasonPromises);
+
+        // Flatten all episodes into a single `videos` array
+        const videos = seasons.flatMap((season) => season.episodes);
 
         const meta = {
             id: `tmdb-series-${seriesId}`,
@@ -381,7 +384,7 @@ app.get('/meta/series/tmdb-series-:id.json', async (req, res) => {
             description: seriesData.overview || '',
             releaseInfo: seriesData.first_air_date?.split('-')[0] || '',
             genres: seriesData.genres.map((genre) => genre.name),
-            seasons,
+            videos, // Use `videos` instead of `seasons` for Stremio compatibility
         };
 
         return res.json({ meta });
@@ -390,8 +393,6 @@ app.get('/meta/series/tmdb-series-:id.json', async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch meta data' });
     }
 });
-
-
 
 // Stream endpoint for series
 app.get('/stream/series/:id.json', (req, res) => {
