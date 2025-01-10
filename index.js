@@ -268,42 +268,46 @@ app.get('/meta/series/tmdb-series-:id.json', async (req, res) => {
 
     try {
         const seriesData = await fetchFromTMDB(`https://api.themoviedb.org/3/tv/${id}`);
-        
-        const seasons = seriesData.seasons.map((season) => {
-            if (season.season_number === 0) return null; // Exclude special seasons
-            return {
-                id: `tmdb-series-${id}-s${season.season_number}`, // Season ID
-                title: season.name || `Сезон ${season.season_number}`, // Season name or fallback
-                episodes: (season.episodes || []).map((episode) => ({
-                    id: `tmdb-series-${id}-s${season.season_number}e${episode.episode_number}`, // Episode ID
-                    title: episode.name || `Епізод ${episode.episode_number}`, // Episode title
-                    season: season.season_number,
-                    episode: episode.episode_number,
-                    released: episode.air_date || null, // Release date
-                    overview: episode.overview || '', // Overview
-                    thumbnail: episode.still_path
-                        ? `https://image.tmdb.org/t/p/w500${episode.still_path}` // Episode thumbnail
-                        : null,
-                })),
-            };
-        });
+        const seasonPromises = seriesData.seasons
+            .filter((season) => season.season_number !== 0) // Exclude specials
+            .map(async (season) => {
+                // Fetch episodes for each season
+                const seasonDetails = await fetchFromTMDB(
+                    `https://api.themoviedb.org/3/tv/${id}/season/${season.season_number}`
+                );
+                return {
+                    id: `tmdb-series-${id}-s${season.season_number}`, // Season ID
+                    title: season.name || `Сезон ${season.season_number}`, // Season name
+                    episodes: (seasonDetails.episodes || []).map((episode) => ({
+                        id: `tmdb-series-${id}-s${season.season_number}e${episode.episode_number}`, // Episode ID
+                        title: episode.name || `Епізод ${episode.episode_number}`, // Episode title
+                        season: season.season_number,
+                        episode: episode.episode_number,
+                        released: episode.air_date || null, // Air date
+                        overview: episode.overview || '', // Episode overview
+                        thumbnail: episode.still_path
+                            ? `https://image.tmdb.org/t/p/w500${episode.still_path}` // Thumbnail URL
+                            : null,
+                    })),
+                };
+            });
 
-        const filteredSeasons = seasons.filter(season => season !== null);
+        const seasons = await Promise.all(seasonPromises); // Wait for all seasons to finish
 
         const meta = {
             id: `tmdb-series-${id}`, // Series ID
-            type: 'series', // Type: series
+            type: 'series',
             name: seriesData.name, // Series name
             poster: seriesData.poster_path
-                ? `https://image.tmdb.org/t/p/w500${seriesData.poster_path}` // Series poster
+                ? `https://image.tmdb.org/t/p/w500${seriesData.poster_path}` // Poster image
                 : null,
             background: seriesData.backdrop_path
-                ? `https://image.tmdb.org/t/p/w1280${seriesData.backdrop_path}` // Series background
+                ? `https://image.tmdb.org/t/p/w1280${seriesData.backdrop_path}` // Background image
                 : null,
-            description: seriesData.overview || '', // Description
+            description: seriesData.overview || '', // Overview
             releaseInfo: seriesData.first_air_date?.split('-')[0] || '', // Release year
-            genres: seriesData.genres.map(genre => genre.name), // Genres
-            seasons: filteredSeasons, // Seasons
+            genres: seriesData.genres.map((genre) => genre.name), // Genres
+            seasons: seasons, // Updated seasons with episodes
         };
 
         res.json({ meta });
