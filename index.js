@@ -7,7 +7,7 @@ const URLSearchParams = require('url').URLSearchParams;
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const TMDB_API_KEY = process.env.TMDB_API_KEY; // Ensure this is set in your environment
+const TMDB_API_KEY = '28797e7035babad606ddbc1642d2ec8b'; // Replace with your TMDB API key
 const LANGUAGE = "uk-UA"; // Set to Ukrainian language.
 
 // Check if API key is set
