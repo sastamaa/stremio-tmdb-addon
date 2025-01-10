@@ -64,7 +64,8 @@ async function fetchFromTMDB(url) {
 
 async function fetchFromTMDB(url) {
     try {
-        const response = await axios.get(`${url}&language=${LANGUAGE}`);
+        const fullUrl = `${url}?api_key=${TMDB_API_KEY}&language=${LANGUAGE}`;
+        const response = await axios.get(fullUrl);
         return response.data;
     } catch (error) {
         console.error("TMDB API error:", error);
@@ -264,30 +265,28 @@ app.get('/catalog/series/tmdb-series.json', async (req, res) => {
 });
 
 // Meta endpoint for series
-app.get("/meta/series/:id.json", async (req, res) => {
+app.get("/meta/series/tmdb-series-:id.json", async (req, res) => {
     const { id } = req.params;
 
     try {
-        console.log(`Fetching metadata for series with ID: ${id}`); // Debugging log
-
-        const seriesData = await fetchFromTMDB(`https://api.themoviedb.org/3/tv/${id}?api_key=${TMDB_API_KEY}`);
+        const seriesData = await fetchFromTMDB(`https://api.themoviedb.org/3/tv/${id}`);
         const trailer = await fetchTrailers("tv", id);
 
         const seasons = await Promise.all(
             seriesData.seasons.map(async (season) => {
-                if (season.season_number === 0) return null; // Exclude specials (optional)
+                if (season.season_number === 0) return null;
 
-                const seasonData = await fetchFromTMDB(`https://api.themoviedb.org/3/tv/${id}/season/${season.season_number}?api_key=${TMDB_API_KEY}`);
+                const seasonData = await fetchFromTMDB(`https://api.themoviedb.org/3/tv/${id}/season/${season.season_number}`);
                 return {
                     id: `tmdb-series-${id}-s${season.season_number}`,
                     title: season.name || `Сезон ${season.season_number}`,
                     episodes: seasonData.episodes.map((episode) => ({
                         id: `tmdb-series-${id}-s${season.season_number}e${episode.episode_number}`,
-                        title: episode.name,
+                        title: episode.name || `Episod ${episode.episode_number}`,
                         season: season.season_number,
                         episode: episode.episode_number,
                         released: episode.air_date,
-                        overview: episode.overview,
+                        overview: episode.overview || "",
                         thumbnail: episode.still_path ? `https://image.tmdb.org/t/p/w500${episode.still_path}` : null,
                     })),
                 };
@@ -303,10 +302,10 @@ app.get("/meta/series/:id.json", async (req, res) => {
             poster: seriesData.poster_path ? `https://image.tmdb.org/t/p/w500${seriesData.poster_path}` : null,
             background: seriesData.backdrop_path ? `https://image.tmdb.org/t/p/w1280${seriesData.backdrop_path}` : null,
             description: seriesData.overview,
-            releaseInfo: seriesData.first_air_date?.split("-")[0], // Extract the year
+            releaseInfo: seriesData.first_air_date?.split("-")[0],
             genres: seriesData.genres.map((genre) => genre.name),
             seasons: filteredSeasons,
-            trailer: trailer, // Include trailer URL if available
+            trailer: trailer,
         };
 
         res.json({ meta });
@@ -316,31 +315,18 @@ app.get("/meta/series/:id.json", async (req, res) => {
     }
 });
 
-
 // Stream endpoint for series episodes
 app.get('/stream/series/tmdb-series-:id.json', (req, res) => {
     const { id } = req.params;
 
-    // Example stream data for demo purposes
     const availableStreams = {
-        'tmdb-series-60625-s1e2': { // Include 'tmdb-series-' prefix
+        'tmdb-series-60625-s1e2': {
             title: 'Rick and Morty S1E2',
             url: 'https://s1.hdvbua.pro/media/content/stream/serials/rick.and.morty.s01e02_1728/hls/720/index.m3u8',
             behaviorHints: { notWebReady: false },
         },
-        'tmdb-series-60625-s1e3': {
-            title: 'Rick and Morty S1E3',
-            url: 'https://s1.hdvbua.pro/media/content/stream/serials/rick.and.morty.s01e03_1729/hls/720/index.m3u8',
-            behaviorHints: { notWebReady: false },
-        },
-        'tmdb-series-60625-s2e1': {
-            title: 'Rick and Morty S2E1',
-            url: 'https://s1.hdvbua.pro/media/content/stream/serials/rick.and.morty.s02e01_1730/hls/720/index.m3u8',
-            behaviorHints: { notWebReady: false },
-        },
+        // Add other streams as needed
     };
-
-    console.log('Fetching stream for series episode:', id);
 
     if (availableStreams[id]) {
         const stream = availableStreams[id];
