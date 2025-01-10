@@ -159,7 +159,7 @@ app.get('/meta/movie/tmdb-movie-:id.json', async (req, res) => {
                     },
                     '402431': {
                         title: 'Wicked',
-                        url: 'https://ashdi.vip/video17/2/new/the.shadow.strays.2024.ua.dub.tak.treba.prodakshn_146773/hls/1080/DaqXjXWRkeBYhA37BA==/index.m3u8', // Replace with actual links
+                        url: 'https://www.sw.vidce.net/d/UZyt7ohW8G4SH9rAT36QXg/1737113698/video/2015/tt1262426.mp4', // Replace with actual links
                         "behaviorHints": {
                             "notWebReady": false
                         }
@@ -317,45 +317,44 @@ app.get("/meta/series/:id.json", async (req, res) => {
 });
 
 
-// Streams endpoint for series
+// Stream endpoint for series
 app.get('/stream/series/tmdb-series-:id.json', (req, res) => {
     const { id } = req.params;
 
-    if (!id || !/^[\d]+-s\d+e\d+$/.test(id)) {
-        console.error(`Invalid series ID format: ${id}`);
-        return res.status(400).json({ error: 'Invalid series ID format' });
-    }
+    // Example stream data for demo purposes
+    const availableStreams = {
+        '60625-s1e2': {
+            title: 'Rick and Morty S1E2',
+            url: 'https://s1.hdvbua.pro/media/content/stream/serials/rick.and.morty.s01e02_1728/hls/720/index.m3u8', // Replace with an actual link
+            behaviorHints: { notWebReady: false },
+        },
+        '60625-s1e3': {
+            title: 'Rick and Morty S1E3',
+            url: 'https://s1.hdvbua.pro/media/content/stream/serials/rick.and.morty.s01e03_1729/hls/720/index.m3u8', // Replace with an actual link
+            behaviorHints: { notWebReady: false },
+        },
+        '60625-s2e1': {
+            title: 'Rick and Morty S2E1',
+            url: 'https://s1.hdvbua.pro/media/content/stream/serials/rick.and.morty.s01e03_1729/hls/720/index.m3u8', // Replace with an actual link
+            behaviorHints: { notWebReady: false },
+        },
+    };
 
-    try {
-        const availableStreams = {
-            '60625-s1e2': {
-                title: 'Rick and Morty S1E2',
-                url: 'https://example.com/rick-and-morty-s1e2.m3u8',
-                behaviorHints: { notWebReady: false },
-            },
-        };
+    console.log('Fetching stream for series episode:', id);
 
-        if (availableStreams[id]) {
-            const stream = availableStreams[id];
-            res.json({
-                streams: [
-                    {
-                        title: stream.title,
-                        url: stream.url,
-                        behaviorHints: stream.behaviorHints,
-                    },
-                ],
-            });
-        } else {
-            console.warn(`No streams found for ID: ${id}`);
-            res.json({ streams: [] });
-        }
-    } catch (error) {
-        console.error(`Error fetching stream for series ID ${id}:`, error.message);
-        res.status(500).json({
-            error: 'An error occurred while fetching the stream.',
-            details: error.message,
+    if (availableStreams[id]) {
+        const stream = availableStreams[id];
+        res.json({
+            streams: [
+                {
+                    title: stream.title,
+                    url: stream.url,
+                    behaviorHints: stream.behaviorHints,
+                },
+            ],
         });
+    } else {
+        res.json({ streams: [] });
     }
 });
 
