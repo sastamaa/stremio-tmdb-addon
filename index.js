@@ -189,7 +189,7 @@ app.get('/stream/movie/tmdb-movie-:id.json', (req, res) => {
 // Catalog endpoint for series
 app.get('/catalog/series/tmdb-series.json', async (req, res) => {
     try {
-        const seriesIds = ['222766', '60625'];
+        const seriesIds = ['60625'];
         const series = await Promise.all(
             seriesIds.map(async (id) => {
                 const seriesData = await fetchFromTMDB(`https://api.themoviedb.org/3/tv/${id}?api_key=${TMDB_API_KEY}`);
@@ -213,56 +213,71 @@ app.get('/catalog/series/tmdb-series.json', async (req, res) => {
 });
 
 // Meta endpoint for series
-app.get('/meta/series/tmdb-series-:id.json', async (req, res) => {
+app.get("/meta/series/:id.json", async (req, res) => {
     const { id } = req.params;
 
-    if (!id) {
-        return res.status(400).json({ error: 'Invalid series ID format' });
-    }
-
     try {
+        console.log(`Fetching metadata for series with ID: ${id}`); // Debugging log
+
         // Fetch series details from TMDB
         const seriesResponse = await axios.get(
             `https://api.themoviedb.org/3/tv/${id}?api_key=${TMDB_API_KEY}`
         );
-
-        if (seriesResponse.status !== 200 || !seriesResponse.data) {
-            console.error(`Error fetching series metadata: Invalid response for series ID ${id}`);
-            return res.status(500).json({ error: 'Failed to fetch series metadata' });
-        }
-
         const seriesData = seriesResponse.data;
 
-        // Construct metadata
-        const seasons = seriesData.seasons
-            ? seriesData.seasons.map((season) => ({
-                  id: `tmdb-series-${id}-s${season.season_number}`,
-                  title: season.name || `Season ${season.season_number}`,
-              }))
-            : [];
+        // Fetch season details with episodes
+        const seasons = await Promise.all(
+            seriesData.seasons.map(async (season) => {
+                if (season.season_number === 0) return null; // Exclude specials (optional)
+                
+                const seasonResponse = await axios.get(
+                    `https://api.themoviedb.org/3/tv/${id}/season/${season.season_number}?api_key=${TMDB_API_KEY}`
+                );
+                const seasonData = seasonResponse.data;
 
+                return {
+                    id: `tmdb-series-${id}-s${season.season_number}`,
+                    title: season.name || `Season ${season.season_number}`,
+                    episodes: seasonData.episodes.map((episode) => ({
+                        id: `tmdb-series-${id}-s${season.season_number}e${episode.episode_number}`,
+                        title: episode.name,
+                        season: season.season_number,
+                        episode: episode.episode_number,
+                        released: episode.air_date,
+                        overview: episode.overview,
+                        thumbnail: episode.still_path
+                            ? `https://image.tmdb.org/t/p/w500${episode.still_path}`
+                            : null,
+                    })),
+                };
+            })
+        );
+
+        // Remove null values (e.g., specials if excluded)
+        const filteredSeasons = seasons.filter((season) => season !== null);
+
+        // Construct metadata object
         const meta = {
-            id: `tmdb-series-${seriesData.id}`,
-            type: 'series',
-            name: seriesData.name || 'Unknown Series',
-            poster: seriesData.poster_path
-                ? `https://image.tmdb.org/t/p/w500${seriesData.poster_path}`
-                : null,
-            description: seriesData.overview || 'No description available.',
-            releaseInfo: seriesData.first_air_date || 'Unknown Release Date',
-            genres: seriesData.genres?.map((genre) => genre.name) || [],
-            seasons,
+            id: `tmdb-series-${id}`,
+            type: "series",
+            name: seriesData.name,
+            poster: `https://image.tmdb.org/t/p/w500${seriesData.poster_path}`,
+            description: seriesData.overview,
+            releaseInfo: seriesData.first_air_date,
+            genres: seriesData.genres.map((genre) => genre.name),
+            seasons: filteredSeasons,
         };
 
+        console.log("Returning metadata for series:", meta); // Debugging log
         res.json({ meta });
     } catch (error) {
         console.error(`Error fetching metadata for series ID ${id}:`, error.message);
-        res.status(500).json({
-            error: 'An error occurred while fetching series metadata.',
-            details: error.message,
-        });
+        res.status(500).json({ error: "Failed to fetch series metadata" });
     }
 });
+
+const PORT = process.env.PORT || 7000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
 
 // Stream endpoint for series
