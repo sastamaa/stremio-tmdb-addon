@@ -276,10 +276,6 @@ app.get("/meta/series/:id.json", async (req, res) => {
     }
 });
 
-const PORT = process.env.PORT || 7000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
-
 // Stream endpoint for series
 app.get('/stream/series/tmdb-series-:id.json', (req, res) => {
     const { id } = req.params;
