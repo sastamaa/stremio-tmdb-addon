@@ -320,13 +320,18 @@ app.get('/stream/series/:id.json', (req, res) => {
     const { id } = req.params;
     console.log('Requested Stream ID:', id);
 
+    // Define streams with IDs matching the meta response
     const availableStreams = {
         'tmdb-series-60625-s1e2-s1e1': {
-            title: 'Rick and Morty S1E2',
-            url: 'https://s1.hdvbua.pro/media/content/stream/serials/rick.and.morty.s01e02_1728/hls/720/index.m3u8', // Replace with your actual stream URL
+            title: 'Rick and Morty S1E1',
+            url: 'https://example.com/stream/rick-and-morty-s1e1.mkv', // Replace with actual stream URL
             behaviorHints: { notWebReady: false },
         },
-        // Add streams dynamically or statically as needed
+        'tmdb-series-60625-s1e2-s1e2': {
+            title: 'Rick and Morty S1E2',
+            url: 'https://example.com/stream/rick-and-morty-s1e2.mkv',
+            behaviorHints: { notWebReady: false },
+        },
     };
 
     if (availableStreams[id]) {
@@ -342,11 +347,9 @@ app.get('/stream/series/:id.json', (req, res) => {
         });
     } else {
         console.error(`No stream found for ID: ${id}`);
-        res.json({ streams: [] }); // Stremio expects empty streams array if no match
+        res.json({ streams: [] }); // Return an empty stream list if no match
     }
 });
-
-
 
 // Start the server
 app.listen(PORT, () => {
