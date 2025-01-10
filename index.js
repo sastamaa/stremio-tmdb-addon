@@ -322,7 +322,7 @@ app.get('/stream/series/:id.json', (req, res) => {
     const availableStreams = {
         'tmdb-series-60625-s1e2': {
             title: 'Rick and Morty S1E2',
-            url: 'https://example.com/stream/s1e2', // Replace with your actual stream URL
+            url: 'https://s1.hdvbua.pro/media/content/stream/serials/rick.and.morty.s01e02_1728/hls/720/index.m3u8', // Replace with your actual stream URL
             behaviorHints: { notWebReady: false },
         },
         // Add streams dynamically or fetch them from your database
