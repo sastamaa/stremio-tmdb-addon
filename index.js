@@ -10,6 +10,17 @@ const LANGUAGE = "uk-UA"; // Set to Ukrainian language.
 
 app.use(cors());
 
+app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
+    next();
+});
+
+app.use((err, req, res, next) => {
+    console.error(`Error processing ${req.originalUrl}:`, err);
+    res.status(500).json({ error: "Internal Server Error" });
+});
+
+
 // Manifest endpoint
 app.get('/manifest.json', (req, res) => {
     res.json({
@@ -131,6 +142,99 @@ app.get('/meta/movie/tmdb-movie-:id.json', async (req, res) => {
     }
 });
 
+ // Stream endpoint for movies
+            app.get('/stream/movie/tmdb-movie-:id.json', (req, res) => {
+                const {
+                    id
+                } = req.params;
+
+                // Example data for demo purposes
+                const availableStreams = {
+                    '335983': {
+                        title: 'Venom',
+                        url: 'https://www.sw.vidce.net/d/bVWmOLjKiF4dIZ13GHbf7g/1736801777/video/2015/tt1262426.mp4', // Replace with actual links
+                        "behaviorHints": {
+                            "notWebReady": true
+                        }
+                    },
+                    '402431': {
+                        title: 'Wicked',
+                        url: 'https://ashdi.vip/video17/2/new/the.shadow.strays.2024.ua.dub.tak.treba.prodakshn_146773/hls/1080/DaqXjXWRkeBYhA37BA==/index.m3u8', // Replace with actual links
+                        "behaviorHints": {
+                            "notWebReady": false
+                        }
+                    },
+                    '1019404': {
+                        title: 'Оса',
+                        url: 'https://ashdi.vip/video17/1/new/the.wasp.2024.ua.mvo.megogo.voice_155425/hls/1080/DaqXjXWRkeBYhA37BA==/index.m3u8', // Replace with actual links
+                        "behaviorHints": {
+                            "notWebReady": false
+                        }
+                    },
+                    '1108566': {
+                        title: 'Вбивча спека',
+                        url: 'https://ashdi.vip/video17/2/new/killer.heat.2024.1080p.amzn.webdl.aac2.0.h.264utopia_145019/hls/480/DaqXjXWRkeBYhA37BA==/index.m3u8', // Replace with actual links
+                        "behaviorHints": {
+                            "notWebReady": false
+                        }
+                    },
+                    '840705': {
+                        title: 'Кліпни двічі',
+                        url: 'https://ashdi.vip/video11/2/new/blink.twice.2024.ua_142368/hls/1080/AqaXi3WGjuRekxH2AQ==/index.m3u8', // Replace with actual links
+                        "behaviorHints": {
+                            "notWebReady": false
+                        }
+                    },
+                    '9489': {
+                        title: 'Вам лист',
+                        url: 'https://s1.hdvbua.pro/media/content/stream/films/youve_got_mail_1998_bdrip_1080p_39534/hls/1080/index.m3u8', // Replace with actual links
+                        "behaviorHints": {
+                            "notWebReady": false
+                        }
+                    },
+                    '350': {
+                        title: 'Диявол носить «Прада',
+                        url: 'https://s1.hdvbua.pro/media/content/stream/films/the_devil_wears_prada_2006_webdlrip720p_open_matte_16954/hls/720/index.m3u8', // Replace with actual links
+                        "behaviorHints": {
+                            "notWebReady": false
+                        }
+                    },
+                    '114': {
+                        title: 'Красуня',
+                        url: 'https://s1.hdvbua.pro/media1/content/stream/new/pretty_woman_1990_bdrip_1080p_h.265_55570/hls/1080/index.m3u8', // Replace with actual links
+                        "behaviorHints": {
+                            "notWebReady": false
+                        }
+                    },
+                    '8835': {
+                        title: 'Білявка в законі',
+                        url: 'https://ashdi.vip/video17/2/films/legally_blonde_2001_bdrip_1080p_4xukr_eng_hurtom_99178/hls/480/DaqXjXWRkeBYhA37BA==/index.m3u8', // Replace with actual links
+                        "behaviorHints": {
+                            "notWebReady": false
+                        }
+                    },
+                };
+
+                const tmdbId = id; // Extract TMDB ID
+                console.log('Fetching stream for TMDB ID:', tmdbId);
+
+                if (availableStreams[tmdbId]) {
+                    const stream = availableStreams[tmdbId];
+                    res.json({
+                        streams: [{
+                            title: stream.title,
+                            url: stream.url,
+                            behaviorHints: {
+                                notWebReady: false,
+                            },
+                        }, ]
+                    });
+                } else {
+                    res.json({
+                        streams: []
+                    });
+                }
+            });
 
 // Catalog endpoint for series
 app.get('/catalog/series/tmdb-series.json', async (req, res) => {
@@ -211,6 +315,50 @@ app.get("/meta/series/:id.json", async (req, res) => {
         res.status(500).json({ error: "Failed to fetch series metadata" });
     }
 });
+
+
+// Streams endpoint for series
+app.get('/stream/series/tmdb-series-:id.json', (req, res) => {
+    const { id } = req.params;
+
+    if (!id || !/^[\d]+-s\d+e\d+$/.test(id)) {
+        console.error(`Invalid series ID format: ${id}`);
+        return res.status(400).json({ error: 'Invalid series ID format' });
+    }
+
+    try {
+        const availableStreams = {
+            '60625-s1e2': {
+                title: 'Rick and Morty S1E2',
+                url: 'https://example.com/rick-and-morty-s1e2.m3u8',
+                behaviorHints: { notWebReady: false },
+            },
+        };
+
+        if (availableStreams[id]) {
+            const stream = availableStreams[id];
+            res.json({
+                streams: [
+                    {
+                        title: stream.title,
+                        url: stream.url,
+                        behaviorHints: stream.behaviorHints,
+                    },
+                ],
+            });
+        } else {
+            console.warn(`No streams found for ID: ${id}`);
+            res.json({ streams: [] });
+        }
+    } catch (error) {
+        console.error(`Error fetching stream for series ID ${id}:`, error.message);
+        res.status(500).json({
+            error: 'An error occurred while fetching the stream.',
+            details: error.message,
+        });
+    }
+});
+
 
 
 // Start the server
