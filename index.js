@@ -324,7 +324,7 @@ app.get('/stream/series/:id.json', (req, res) => {
 
     // Define streams with IDs matching the meta response
     const availableStreams = {
-        'tmdb-series-60625-s1e2': {
+        'tmdb-series-60625-s1e1': {
             title: 'Rick and Morty S1E1',
             url: 'https://example.com/stream/rick-and-morty-s1e1.mkv', // Replace with actual stream URL
             behaviorHints: { notWebReady: false },
