@@ -71,7 +71,7 @@ async function fetchFromTMDB(endpoint) {
 // Catalog endpoint for movies
 app.get('/catalog/movie/tmdb-movies.json', async (req, res) => {
     try {
-        const movieIds = ['335983', '402431', '1019404', '1108566', '840705', '114', '9489', '350', '8835'];
+        const movieIds = ['585083', '616747', '1019404', '1108566', '840705', '114', '9489', '350', '8835', '545611', '519182', '1014590'];
         const movies = await Promise.all(
             movieIds.map(async (id) => {
                 const movieData = await fetchFromTMDB(`https://api.themoviedb.org/3/movie/${id}`);
@@ -127,16 +127,16 @@ app.get('/meta/movie/tmdb-movie-:id.json', async (req, res) => {
 
                 // Example data for demo purposes
                 const availableStreams = {
-                    '335983': {
-                        title: 'Venom',
-                        url: 'https://www.sw.vidce.net/d/bVWmOLjKiF4dIZ13GHbf7g/1736801777/video/2015/tt1262426.mp4', // Replace with actual links
+                    '585083': {
+                        title: 'Монстри на канікулах: Трансформанія',
+                        url: 'https://s1.hdvbua.pro/media1/content/stream/films/hotel_transylvania_transformania_2022_webrip_1080p_83600/hls/1080/index.m3u8', // Replace with actual links
                         "behaviorHints": {
                             "notWebReady": true
                         }
                     },
-                    '402431': {
-                        title: 'Wicked',
-                        url: 'https://www.sw.vidce.net/d/UZyt7ohW8G4SH9rAT36QXg/1737113698/video/2015/tt1262426.mp4', // Replace with actual links
+                    '616747': {
+                        title: 'Маєток з привидами',
+                        url: 'https://s1.hdvbua.pro/media1/content/stream/films/haunted_mansion_2023_webdl_1080p_91673/hls/1080/index.m3u8', // Replace with actual links
                         "behaviorHints": {
                             "notWebReady": false
                         }
@@ -186,6 +186,20 @@ app.get('/meta/movie/tmdb-movie-:id.json', async (req, res) => {
                     '8835': {
                         title: 'Білявка в законі',
                         url: 'https://ashdi.vip/video17/2/films/legally_blonde_2001_bdrip_1080p_4xukr_eng_hurtom_99178/hls/480/DaqXjXWRkeBYhA37BA==/index.m3u8', // Replace with actual links
+                        "behaviorHints": {
+                            "notWebReady": false
+                        }
+                    },
+                      '1014590': {
+                        title: 'Підвищення',
+                        url: 'https://s1.hdvbua.pro/media/content/stream/films/upgraded.2024.webdl.1080p.uakino.mvo_101451/hls/1080/index.m3u8', // Replace with actual links
+                        "behaviorHints": {
+                            "notWebReady": false
+                        }
+                    },
+                      '519182': {
+                        title: 'Нікчемний Я 4',
+                        url: 'https://s1.hdvbua.pro/media/content/stream/films/despicable.me.4.2024.bdremux.1080p.ledoyen.dub_102367/hls/480/index.m3u8', // Replace with actual links
                         "behaviorHints": {
                             "notWebReady": false
                         }
