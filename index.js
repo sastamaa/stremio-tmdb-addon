@@ -318,6 +318,7 @@ app.get('/meta/series/tmdb-series-:id.json', async (req, res) => {
 // Stream endpoint for series
 app.get('/stream/series/:id.json', (req, res) => {
     const { id } = req.params;
+    console.log('Requested Stream ID:', id);
 
     const availableStreams = {
         'tmdb-series-60625-s1e2': {
@@ -325,7 +326,7 @@ app.get('/stream/series/:id.json', (req, res) => {
             url: 'https://s1.hdvbua.pro/media/content/stream/serials/rick.and.morty.s01e02_1728/hls/720/index.m3u8', // Replace with your actual stream URL
             behaviorHints: { notWebReady: false },
         },
-        // Add streams dynamically or fetch them from your database
+        // Add streams dynamically or statically as needed
     };
 
     if (availableStreams[id]) {
@@ -340,9 +341,11 @@ app.get('/stream/series/:id.json', (req, res) => {
             ],
         });
     } else {
-        res.json({ streams: [] }); // No stream found
+        console.error(`No stream found for ID: ${id}`);
+        res.json({ streams: [] }); // Stremio expects empty streams array if no match
     }
 });
+
 
 
 // Start the server
