@@ -267,110 +267,55 @@ app.get('/meta/series/tmdb-series-:id.json', async (req, res) => {
     const { id } = req.params;
 
     try {
-        // Parse the ID for series, season, or episode
-        const [seriesId, seasonEpisodeId] = id.split(/-s(\d+e\d+)?/).filter(Boolean);
-        const isEpisode = seasonEpisodeId && seasonEpisodeId.includes('e');
-        const isSeason = seasonEpisodeId && !seasonEpisodeId.includes('e');
-
-        if (isEpisode) {
-            // Episode-specific metadata
-            const [seasonNumber, episodeNumber] = seasonEpisodeId.match(/\d+/g).map(Number);
-            const seasonDetails = await fetchFromTMDB(
-                `https://api.themoviedb.org/3/tv/${seriesId}/season/${seasonNumber}`
-            );
-
-            const episode = seasonDetails.episodes.find(
-                (ep) => ep.episode_number === episodeNumber
-            );
-
-            if (!episode) {
-                return res.status(404).json({ error: 'Episode not found' });
-            }
-
-            const meta = {
-                id: `tmdb-series-${seriesId}-s${seasonNumber}e${episodeNumber}`,
-                type: 'series',
-                name: episode.name || `Episode ${episodeNumber}`,
-                poster: episode.still_path
-                    ? `https://image.tmdb.org/t/p/w500${episode.still_path}`
-                    : null,
-                background: episode.still_path
-                    ? `https://image.tmdb.org/t/p/w1280${episode.still_path}`
-                    : null,
-                description: episode.overview || '',
-                releaseInfo: episode.air_date || '',
-                genres: [],
-            };
-
-            return res.json({ meta });
-        }
-
-        if (isSeason) {
-            // Season-specific metadata
-            const seasonNumber = parseInt(seasonEpisodeId.replace('s', ''), 10);
-            const seasonDetails = await fetchFromTMDB(
-                `https://api.themoviedb.org/3/tv/${seriesId}/season/${seasonNumber}`
-            );
-
-            const episodes = seasonDetails.episodes.map((ep) => ({
-                id: `tmdb-series-${seriesId}-s${seasonNumber}e${ep.episode_number}`,
-                title: ep.name || `Episode ${ep.episode_number}`,
-                season: seasonNumber,
-                episode: ep.episode_number,
-                released: ep.air_date || null,
-                overview: ep.overview || '',
-                thumbnail: ep.still_path
-                    ? `https://image.tmdb.org/t/p/w500${ep.still_path}`
-                    : null,
-            }));
-
-            const meta = {
-                id: `tmdb-series-${seriesId}-s${seasonNumber}`,
-                type: 'series',
-                name: seasonDetails.name || `Season ${seasonNumber}`,
-                poster: seasonDetails.poster_path
-                    ? `https://image.tmdb.org/t/p/w500${seasonDetails.poster_path}`
-                    : null,
-                background: seasonDetails.backdrop_path
-                    ? `https://image.tmdb.org/t/p/w1280${seasonDetails.backdrop_path}`
-                    : null,
-                description: seasonDetails.overview || '',
-                releaseInfo: seasonDetails.air_date || '',
-                genres: [],
-                videos: episodes, // Use `videos` for Stremio compatibility
-            };
-
-            return res.json({ meta });
-        }
-
-        // Base series metadata
+        const seriesId = id.split('-')[0]; // Extract series ID
         const seriesData = await fetchFromTMDB(`https://api.themoviedb.org/3/tv/${seriesId}`);
 
-        const seasons = await Promise.all(
-            seriesData.seasons.map(async (season) => {
-                const seasonDetails = await fetchFromTMDB(
-                    `https://api.themoviedb.org/3/tv/${seriesId}/season/${season.season_number}`
-                );
-                return {
-                    id: `tmdb-series-${seriesId}-s${season.season_number}`,
-                    title: season.name || `Season ${season.season_number}`,
-                    episodes: seasonDetails.episodes.map((ep) => ({
-                        id: `tmdb-series-${seriesId}-s${season.season_number}e${ep.episode_number}`,
-                        title: ep.name || `Episode ${ep.episode_number}`,
-                        season: season.season_number,
-                        episode: ep.episode_number,
-                        released: ep.air_date || null,
-                        overview: ep.overview || '',
-                        thumbnail: ep.still_path
-                            ? `https://image.tmdb.org/t/p/w500${ep.still_path}`
-                            : null,
-                    })),
-                };
-            })
-        );
+        const seasonPromises = seriesData.seasons.map(async (season) => {
+            const seasonDetails = await fetchFromTMDB(
+                `https://api.themoviedb.org/3/tv/${seriesId}/season/${season.season_number}`
+            );
+
+            return {
+                id: `tmdb-series-${seriesId}-s${season.season_number}`,
+                title: season.name || `Season ${season.season_number}`,
+                episodes: seasonDetails.episodes.map((ep) => ({
+                    id: `tmdb-series-${seriesId}-s${season.season_number}e${ep.episode_number}`,
+                    title: ep.name || `Episode ${ep.episode_number}`,
+                    season: season.season_number,
+                    episode: ep.episode_number,
+                    released: ep.air_date || null,
+                    overview: ep.overview || '',
+                    thumbnail: ep.still_path
+                        ? `https://image.tmdb.org/t/p/w500${ep.still_path}`
+                        : null,
+                })),
+            };
+        });
+
+        const seasons = await Promise.all(seasonPromises);
 
         // Flatten all episodes into a single `videos` array
-        const videos = seasons.flatMap((season) => season.episodes);
+        const videos = seasons.flatMap((season) =>
+            season.episodes.map((ep) => ({
+                id: ep.id,
+                title: ep.title,
+                season: ep.season,
+                episode: ep.episode,
+                overview: ep.overview,
+                thumbnail: ep.thumbnail,
+                released: ep.released,
+            }))
+        );
+
+        // Optionally add a series-level video for all episodes
+        videos.push({
+            id: `tmdb-series-${seriesId}`,
+            title: `${seriesData.name} - All Episodes`,
+            overview: seriesData.overview,
+            thumbnail: seriesData.poster_path
+                ? `https://image.tmdb.org/t/p/w500${seriesData.poster_path}`
+                : null,
+        });
 
         const meta = {
             id: `tmdb-series-${seriesId}`,
@@ -385,16 +330,17 @@ app.get('/meta/series/tmdb-series-:id.json', async (req, res) => {
             description: seriesData.overview || '',
             releaseInfo: seriesData.first_air_date?.split('-')[0] || '',
             genres: seriesData.genres.map((genre) => genre.name),
-            seasons, // Nested season structure
-            videos, // Flat video list for compatibility
+            seasons: seasons, // Include seasons for compatibility with Android TV
+            videos, // Include flattened videos for episodes and series-level streams
         };
 
-        return res.json({ meta });
+        res.json({ meta });
     } catch (error) {
-        console.error('Error fetching metadata:', error);
-        res.status(500).json({ error: 'Failed to fetch metadata' });
+        console.error('Error fetching meta data:', error);
+        res.status(500).json({ error: 'Failed to fetch meta data' });
     }
 });
+
 
 
 // Stream endpoint for series
