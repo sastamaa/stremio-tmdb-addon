@@ -267,27 +267,36 @@ app.get('/meta/series/tmdb-series-:id.json', async (req, res) => {
     const { id } = req.params;
 
     try {
-        // Parse the ID
+        // Parse the ID for series, season, or episode
         const [seriesId, seasonEpisodeId] = id.split(/-s(\d+e\d+)?/).filter(Boolean);
         const isEpisode = seasonEpisodeId && seasonEpisodeId.includes('e');
         const isSeason = seasonEpisodeId && !seasonEpisodeId.includes('e');
 
         if (isEpisode) {
-            // Handle episode metadata
+            // Episode-specific metadata
             const [seasonNumber, episodeNumber] = seasonEpisodeId.match(/\d+/g).map(Number);
             const seasonDetails = await fetchFromTMDB(
                 `https://api.themoviedb.org/3/tv/${seriesId}/season/${seasonNumber}`
             );
 
-            const episode = seasonDetails.episodes.find((ep) => ep.episode_number === episodeNumber);
-            if (!episode) return res.status(404).json({ error: 'Episode not found' });
+            const episode = seasonDetails.episodes.find(
+                (ep) => ep.episode_number === episodeNumber
+            );
+
+            if (!episode) {
+                return res.status(404).json({ error: 'Episode not found' });
+            }
 
             const meta = {
                 id: `tmdb-series-${seriesId}-s${seasonNumber}e${episodeNumber}`,
                 type: 'series',
                 name: episode.name || `Episode ${episodeNumber}`,
-                poster: episode.still_path ? `https://image.tmdb.org/t/p/w500${episode.still_path}` : null,
-                background: episode.still_path ? `https://image.tmdb.org/t/p/w1280${episode.still_path}` : null,
+                poster: episode.still_path
+                    ? `https://image.tmdb.org/t/p/w500${episode.still_path}`
+                    : null,
+                background: episode.still_path
+                    ? `https://image.tmdb.org/t/p/w1280${episode.still_path}`
+                    : null,
                 description: episode.overview || '',
                 releaseInfo: episode.air_date || '',
                 genres: [],
@@ -297,7 +306,7 @@ app.get('/meta/series/tmdb-series-:id.json', async (req, res) => {
         }
 
         if (isSeason) {
-            // Handle season metadata
+            // Season-specific metadata
             const seasonNumber = parseInt(seasonEpisodeId.replace('s', ''), 10);
             const seasonDetails = await fetchFromTMDB(
                 `https://api.themoviedb.org/3/tv/${seriesId}/season/${seasonNumber}`
@@ -310,7 +319,9 @@ app.get('/meta/series/tmdb-series-:id.json', async (req, res) => {
                 episode: ep.episode_number,
                 released: ep.air_date || null,
                 overview: ep.overview || '',
-                thumbnail: ep.still_path ? `https://image.tmdb.org/t/p/w500${ep.still_path}` : null,
+                thumbnail: ep.still_path
+                    ? `https://image.tmdb.org/t/p/w500${ep.still_path}`
+                    : null,
             }));
 
             const meta = {
@@ -326,7 +337,7 @@ app.get('/meta/series/tmdb-series-:id.json', async (req, res) => {
                 description: seasonDetails.overview || '',
                 releaseInfo: seasonDetails.air_date || '',
                 genres: [],
-                episodes, // Use `episodes` for consistency
+                videos: episodes, // Use `videos` for Stremio compatibility
             };
 
             return res.json({ meta });
@@ -334,12 +345,12 @@ app.get('/meta/series/tmdb-series-:id.json', async (req, res) => {
 
         // Base series metadata
         const seriesData = await fetchFromTMDB(`https://api.themoviedb.org/3/tv/${seriesId}`);
+
         const seasons = await Promise.all(
             seriesData.seasons.map(async (season) => {
                 const seasonDetails = await fetchFromTMDB(
                     `https://api.themoviedb.org/3/tv/${seriesId}/season/${season.season_number}`
                 );
-
                 return {
                     id: `tmdb-series-${seriesId}-s${season.season_number}`,
                     title: season.name || `Season ${season.season_number}`,
@@ -358,6 +369,9 @@ app.get('/meta/series/tmdb-series-:id.json', async (req, res) => {
             })
         );
 
+        // Flatten all episodes into a single `videos` array
+        const videos = seasons.flatMap((season) => season.episodes);
+
         const meta = {
             id: `tmdb-series-${seriesId}`,
             type: 'series',
@@ -371,13 +385,14 @@ app.get('/meta/series/tmdb-series-:id.json', async (req, res) => {
             description: seriesData.overview || '',
             releaseInfo: seriesData.first_air_date?.split('-')[0] || '',
             genres: seriesData.genres.map((genre) => genre.name),
-            seasons, // Nested `seasons`
+            seasons, // Nested season structure
+            videos, // Flat video list for compatibility
         };
 
         return res.json({ meta });
     } catch (error) {
-        console.error('Error fetching meta data:', error);
-        res.status(500).json({ error: 'Failed to fetch meta data' });
+        console.error('Error fetching metadata:', error);
+        res.status(500).json({ error: 'Failed to fetch metadata' });
     }
 });
 
@@ -385,13 +400,15 @@ app.get('/meta/series/tmdb-series-:id.json', async (req, res) => {
 // Stream endpoint for series
 app.get('/stream/series/:id.json', (req, res) => {
     const { id } = req.params;
+
     console.log('Requested Stream ID:', id);
 
-    // Define streams with IDs matching the meta response
+    // Define streams for episodes and series-level IDs
     const availableStreams = {
+        // Episode-level streams
         'tmdb-series-60625-s1e1': {
             title: 'Rick and Morty S1E1',
-            url: 'https://s1.hdvbua.pro/media/content/stream/serials/rick.and.morty.s01e02_1728/hls/720/index.m3u8', // Replace with actual stream URL
+            url: 'https://s1.hdvbua.pro/media/content/stream/serials/rick.and.morty.s01e02_1728/hls/720/index.m3u8',
             behaviorHints: { notWebReady: false },
         },
         'tmdb-series-60625-s1e2': {
@@ -399,8 +416,15 @@ app.get('/stream/series/:id.json', (req, res) => {
             url: 'https://s1.hdvbua.pro/media/content/stream/serials/rick.and.morty.s01e02_1728/hls/720/index.m3u8',
             behaviorHints: { notWebReady: false },
         },
+        // Series-level streams
+        'tmdb-series-60625': {
+            title: 'Rick and Morty - All Episodes',
+            url: 'https://example.com/rick-and-morty-all-episodes.m3u8', // Replace with the actual series-level stream URL
+            behaviorHints: { notWebReady: false },
+        },
     };
 
+    // Check for the requested ID in availableStreams
     if (availableStreams[id]) {
         const stream = availableStreams[id];
         res.json({
