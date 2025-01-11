@@ -389,47 +389,47 @@ app.get('/meta/series/tmdb-series-:id.json', async (req, res) => {
 // Stream endpoint for series
 app.get('/stream/series/:id.json', (req, res) => {
     const { id } = req.params;
-
     console.log('Requested Stream ID:', id);
 
-    // Define streams for episodes and series-level IDs
     const availableStreams = {
-        // Episode-level streams
+        // Define streams for specific episodes
         'tmdb-series-60625-s1e1': {
             title: 'Rick and Morty S1E1',
-            url: 'https://s1.hdvbua.pro/media/content/stream/serials/rick.and.morty.s01e02_1728/hls/720/index.m3u8',
+            url: 'https://example.com/stream1.m3u8',
             behaviorHints: { notWebReady: false },
         },
         'tmdb-series-60625-s1e2': {
             title: 'Rick and Morty S1E2',
-            url: 'https://s1.hdvbua.pro/media/content/stream/serials/rick.and.morty.s01e02_1728/hls/720/index.m3u8',
+            url: 'https://example.com/stream2.m3u8',
             behaviorHints: { notWebReady: false },
         },
-        // Series-level streams
+        // Define a placeholder stream for the series
         'tmdb-series-60625': {
-            title: 'Rick and Morty - All Episodes',
-            url: 'https://example.com/rick-and-morty-all-episodes.m3u8', // Replace with the actual series-level stream URL
-            behaviorHints: { notWebReady: false },
+            title: 'Rick and Morty - Explore Episodes',
+            url: null, // Base series doesn't have a playable stream
+            behaviorHints: { notWebReady: true },
         },
     };
 
-    // Check for the requested ID in availableStreams
     if (availableStreams[id]) {
         const stream = availableStreams[id];
         res.json({
-            streams: [
-                {
-                    title: stream.title,
-                    url: stream.url,
-                    behaviorHints: stream.behaviorHints,
-                },
-            ],
+            streams: stream.url
+                ? [
+                      {
+                          title: stream.title,
+                          url: stream.url,
+                          behaviorHints: stream.behaviorHints,
+                      },
+                  ]
+                : [], // Return empty streams if no specific URL exists
         });
     } else {
         console.error(`No stream found for ID: ${id}`);
-        res.json({ streams: [] }); // Return an empty stream list if no match
+        res.json({ streams: [] }); // Empty stream list if no match
     }
 });
+
 
 // Start the server
 app.listen(PORT, () => {
