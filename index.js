@@ -129,7 +129,7 @@ app.get('/meta/movie/tmdb-movie-:id.json', async (req, res) => {
                 const availableStreams = {
                      '402431': {
                         title: 'Wicked',
-                        url: 'https://crimson.stream.voidboost.cc/f18d2a0f3747324bffb1be571730f97e:2025011118:ejRNbWM5Uk5idkhTZTA5U05tRTEzREx6WWdWM0dIengvbWdqNGRaU3NkMCsxVTBaVHhXTzJzNkQ0MjhwY3B2Z0ppbDcwY3FFeUI4allQejdqVDVoTWc9PQ==/1/1/9/2/6/1/3/4ljwr.mp4:hls:manifest.m3u8', // Replace with actual links
+                        url: 'https://list.iptvcat.com/my_list/s/2055d9f1e28352ff9f15a92d2f9b13ea.m3u8', // Replace with actual links
                         "behaviorHints": {
                             "notWebReady": false
                         }
