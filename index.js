@@ -17,27 +17,50 @@ if (!TMDB_API_KEY) {
 
 // Enable CORS globally
 app.use(cors({
-    origin: '*', // Allow all origins; restrict as needed
+    origin: '*', // Allow all origins
     methods: ['GET', 'OPTIONS'], // Allowed methods
-    allowedHeaders: ['Content-Type'] // Allowed headers
+    allowedHeaders: ['Content-Type'], // Allowed headers
 }));
 
-// Middleware to log requests
+// Middleware to log requests (optional for debugging)
 app.use((req, res, next) => {
     console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
     next();
 });
 
-// Handle errors globally
+// Global error handler (optional)
 app.use((err, req, res, next) => {
     console.error(`Error processing ${req.originalUrl}:`, err);
     res.status(500).json({ error: "Internal Server Error" });
 });
 
-// Example route for verifying CORS (optional, for debugging)
+// Example route to verify server is running (optional)
 app.get('/ping', (req, res) => {
-    res.setHeader("Access-Control-Allow-Origin", "*"); // Ensure CORS headers for specific responses
+    res.setHeader("Access-Control-Allow-Origin", "*");
     res.json({ message: "CORS headers are working!" });
+});
+
+// Proxy video stream route
+app.get('/proxy/:videoId', async (req, res) => {
+    const videoId = req.params.videoId;
+    const videoUrl = `https://www.sw.vidce.net/d/.../${videoId}.mp4`; // Replace with actual URL
+
+    try {
+        const response = await axios({
+            method: 'GET',
+            url: videoUrl,
+            responseType: 'stream',
+        });
+
+        res.setHeader("Access-Control-Allow-Origin", "*");
+        res.setHeader("Content-Type", response.headers['content-type']);
+        res.setHeader("Content-Length", response.headers['content-length']);
+
+        response.data.pipe(res);
+    } catch (error) {
+        console.error(`Failed to stream video for ID: ${videoId}`, error.message);
+        res.status(500).json({ error: "Error accessing video" });
+    }
 });
 
 // Manifest endpoint
