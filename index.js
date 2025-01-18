@@ -142,7 +142,7 @@ app.get('/meta/movie/tmdb-movie-:id.json', async (req, res) => {
                 const availableStreams = {
                      '402431': {
                         title: 'Wicked',
-                        url: 'https://list.iptvcat.com/my_list/s/2055d9f1e28352ff9f15a92d2f9b13ea.m3u8', // Replace with actual links
+                        url: 'https://www.sw.vidce.net/d/yEBBeXTv5wlwa0L64bdu6g/1737791598/video/2015/tt14227048.mp4', // Replace with actual links
                         "behaviorHints": {
                             "notWebReady": false
                         }
