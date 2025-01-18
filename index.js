@@ -40,26 +40,27 @@ app.get('/ping', (req, res) => {
     res.json({ message: "CORS headers are working!" });
 });
 
-// Proxy video stream route
-app.get('/proxy/:videoId', async (req, res) => {
-    const videoId = req.params.videoId;
-    const videoUrl = `https://www.sw.vidce.net/d/.../${videoId}.mp4`; // Replace with actual URL
+app.get('/proxy/:path(*)', async (req, res) => {
+    const videoUrl = req.params.path;
 
     try {
-        const response = await axios({
+        const videoResponse = await axios({
             method: 'GET',
-            url: videoUrl,
+            url: `https://${videoUrl}`,
             responseType: 'stream',
+            headers: {
+                'User-Agent': req.headers['user-agent'], // Pass client headers as needed
+            },
         });
 
-        res.setHeader("Access-Control-Allow-Origin", "*");
-        res.setHeader("Content-Type", response.headers['content-type']);
-        res.setHeader("Content-Length", response.headers['content-length']);
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Content-Type', videoResponse.headers['content-type']);
 
-        response.data.pipe(res);
-    } catch (error) {
-        console.error(`Failed to stream video for ID: ${videoId}`, error.message);
-        res.status(500).json({ error: "Error accessing video" });
+        // Pipe the video stream to the client
+        videoResponse.data.pipe(res);
+    } catch (err) {
+        console.error('Error proxying video:', err.message);
+        res.status(500).json({ error: 'Error proxying video stream.' });
     }
 });
 
