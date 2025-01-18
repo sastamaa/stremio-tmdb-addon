@@ -15,16 +15,29 @@ if (!TMDB_API_KEY) {
     throw new Error('TMDB_API_KEY is not set.');
 }
 
-app.use(cors());
+// Enable CORS globally
+app.use(cors({
+    origin: '*', // Allow all origins; restrict as needed
+    methods: ['GET', 'OPTIONS'], // Allowed methods
+    allowedHeaders: ['Content-Type'] // Allowed headers
+}));
 
+// Middleware to log requests
 app.use((req, res, next) => {
     console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
     next();
 });
 
+// Handle errors globally
 app.use((err, req, res, next) => {
     console.error(`Error processing ${req.originalUrl}:`, err);
     res.status(500).json({ error: "Internal Server Error" });
+});
+
+// Example route for verifying CORS (optional, for debugging)
+app.get('/ping', (req, res) => {
+    res.setHeader("Access-Control-Allow-Origin", "*"); // Ensure CORS headers for specific responses
+    res.json({ message: "CORS headers are working!" });
 });
 
 // Manifest endpoint
