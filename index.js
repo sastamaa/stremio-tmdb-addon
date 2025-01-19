@@ -430,39 +430,74 @@ app.get('/stream/series/:id.json', (req, res) => {
 
     const availableStreams = {
         // Define streams for specific episodes
-        'tmdb-series-bodkin-s1e1': {
-            title: 'Rick and Morty S1E1',
+        'tmdb-series-241257-s1e1': {
+            title: 'Bodkin S1E1',
             url: 'https://ashdi.vip/video17/1/new/s_1_ep_1_127258/hls/1080/DaqXjXWRkeBYhA37BA==/index.m3u8',
             behaviorHints: { notWebReady: false },
         },
-        'tmdb-series-bodkin-s1e2': {
+        'tmdb-series-241257-s1e2': {
             title: 'Bodkin S1E2',
             url: 'https://ashdi.vip/video17/1/new/s_1_ep_2_127316/hls/1080/DaqXjXWRkeBYhA37BA==/index.m3u8',
             behaviorHints: { notWebReady: false },
         },
-                'tmdb-series-bodkin-s1e3': {
+                'tmdb-series-241257-s1e3': {
             title: 'Bodkin S1E3',
             url: 'https://ashdi.vip/video17/1/new/s_1_ep_3_127361/hls/1080/DaqXjXWRkeBYhA37BA==/index.m3u8',
             behaviorHints: { notWebReady: false },
         },
-                'tmdb-series-bodkin-s1e4': {
+                'tmdb-series-241257-s1e4': {
             title: 'Bodkin S1E4',
             url: 'https://ashdi.vip/video17/1/new/s_1_ep_4_127360/hls/1080/DaqXjXWRkeBYhA37BA==/index.m3u8',
             behaviorHints: { notWebReady: false },
         },
-                'tmdb-series-bodkin-s1e5': {
+                'tmdb-series-241257-s1e5': {
             title: 'Bodkin S1E5',
             url: 'https://ashdi.vip/video17/1/new/s_1_ep_5_127358/hls/1080/DaqXjXWRkeBYhA37BA==/index.m3u8',
             behaviorHints: { notWebReady: false },
         },
-                'tmdb-series-bodkin-s1e6': {
+                'tmdb-series-241257-s1e6': {
             title: 'Bodkin S1E6',
             url: 'https://ashdi.vip/video17/1/new/s_1_ep_6_127377/hls/1080/DaqXjXWRkeBYhA37BA==/index.m3u8',
             behaviorHints: { notWebReady: false },
         },
-                'tmdb-series-bodkin-s1e7': {
+                'tmdb-series-241257-s1e7': {
             title: 'Bodkin S1E7',
             url: 'https://ashdi.vip/video17/1/new/s_1_ep_7_127376/hls/1080/DaqXjXWRkeBYhA37BA==/index.m3u8',
+            behaviorHints: { notWebReady: false },
+        },
+        'tmdb-series-226637-s1e1': {
+            title: 'High Potential S1E1',
+            url: 'https://ashdi.vip/video8/2/new/high.potential.s01e01.1080p.amzn.webdl.h.264.ukr.eng_151148/hls/1080/AqaXi3WGjuRfmhH2BA==/index.m3u8',
+            behaviorHints: { notWebReady: false },
+        },
+        'tmdb-series-226637-s1e2': {
+            title: 'High Potential S1E2',
+            url: 'https://ashdi.vip/video8/2/new/high.potential.s01e02.1080p.amzn.webdl.h.264.ukr.eng_151149/hls/1080/AqaXi3WGjuRfmhH2BA==/index.m3u8',
+            behaviorHints: { notWebReady: false },
+        },
+                'tmdb-series-226637-s1e3': {
+            title: 'High Potential S1E3',
+            url: 'https://ashdi.vip/video8/2/new/s_1_ep_3_151259/hls/1080/AqaXi3WGjuRfmhH2BA==/index.m3u8',
+            behaviorHints: { notWebReady: false },
+        },
+                'tmdb-series-226637-s1e4': {
+            title: 'High Potential S1E4',
+            url: 'https://ashdi.vip/video8/2/new/s_1_ep_4_151261/hls/1080/AqaXi3WGjuRfmhH2BA==/index.m3u8',
+            behaviorHints: { notWebReady: false },
+        },
+                'tmdb-series-226637-s1e5': {
+            title: 'High Potential S1E5',
+            url: 'https://ashdi.vip/video8/2/new/s_1_ep_5_151262/hls/1080/AqaXi3WGjuRfmhH2BA==/index.m3u8',
+            behaviorHints: { notWebReady: false },
+        },
+                'tmdb-series-226637-s1e6': {
+            title: 'High Potential S1E6',
+            url: 'https://ashdi.vip/video8/2/new/s_1_ep_6_151559/hls/1080/AqaXi3WGjuRfmhH2BA==/index.m3u8',
+            behaviorHints: { notWebReady: false },
+        },
+                'tmdb-series-226637-s1e7': {
+            title: 'High Potential S1E7',
+            url: 'https://ashdi.vip/video8/2/new/s_1_ep_7_151560/hls/1080/AqaXi3WGjuRfmhH2BA==/index.m3u8',
             behaviorHints: { notWebReady: false },
         },
     };
