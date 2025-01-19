@@ -275,7 +275,7 @@ app.get('/meta/movie/tmdb-movie-:id.json', async (req, res) => {
 // Catalog endpoint for series
 app.get('/catalog/series/tmdb-series.json', async (req, res) => {
     try {
-        const seriesIds = ['60625'];
+        const seriesIds = ['241257', '213306', '226637'];
         const series = await Promise.all(
             seriesIds.map(async (id) => {
                 const seriesData = await fetchFromTMDB(`https://api.themoviedb.org/3/tv/${id}`);
@@ -430,21 +430,40 @@ app.get('/stream/series/:id.json', (req, res) => {
 
     const availableStreams = {
         // Define streams for specific episodes
-        'tmdb-series-60625-s1e1': {
+        'tmdb-series-bodkin-s1e1': {
             title: 'Rick and Morty S1E1',
-            url: 'https://example.com/stream1.m3u8',
+            url: 'https://ashdi.vip/video17/1/new/s_1_ep_1_127258/hls/1080/DaqXjXWRkeBYhA37BA==/index.m3u8',
             behaviorHints: { notWebReady: false },
         },
-        'tmdb-series-60625-s1e2': {
-            title: 'Rick and Morty S1E2',
-            url: 'https://example.com/stream2.m3u8',
+        'tmdb-series-bodkin-s1e2': {
+            title: 'Bodkin S1E2',
+            url: 'https://ashdi.vip/video17/1/new/s_1_ep_2_127316/hls/1080/DaqXjXWRkeBYhA37BA==/index.m3u8',
             behaviorHints: { notWebReady: false },
         },
-        // Define a placeholder stream for the series
-        'tmdb-series-60625': {
-            title: 'Rick and Morty - Explore Episodes',
-            url: null, // Base series doesn't have a playable stream
-            behaviorHints: { notWebReady: true },
+                'tmdb-series-bodkin-s1e3': {
+            title: 'Bodkin S1E3',
+            url: 'https://ashdi.vip/video17/1/new/s_1_ep_3_127361/hls/1080/DaqXjXWRkeBYhA37BA==/index.m3u8',
+            behaviorHints: { notWebReady: false },
+        },
+                'tmdb-series-bodkin-s1e4': {
+            title: 'Bodkin S1E4',
+            url: 'https://ashdi.vip/video17/1/new/s_1_ep_4_127360/hls/1080/DaqXjXWRkeBYhA37BA==/index.m3u8',
+            behaviorHints: { notWebReady: false },
+        },
+                'tmdb-series-bodkin-s1e5': {
+            title: 'Bodkin S1E5',
+            url: 'https://ashdi.vip/video17/1/new/s_1_ep_5_127358/hls/1080/DaqXjXWRkeBYhA37BA==/index.m3u8',
+            behaviorHints: { notWebReady: false },
+        },
+                'tmdb-series-bodkin-s1e6': {
+            title: 'Bodkin S1E6',
+            url: 'https://ashdi.vip/video17/1/new/s_1_ep_6_127377/hls/1080/DaqXjXWRkeBYhA37BA==/index.m3u8',
+            behaviorHints: { notWebReady: false },
+        },
+                'tmdb-series-bodkin-s1e7': {
+            title: 'Bodkin S1E7',
+            url: 'https://ashdi.vip/video17/1/new/s_1_ep_7_127376/hls/1080/DaqXjXWRkeBYhA37BA==/index.m3u8',
+            behaviorHints: { notWebReady: false },
         },
     };
 
