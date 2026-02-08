@@ -166,14 +166,14 @@ app.get('/meta/movie/tmdb-movie-:id.json', async (req, res) => {
                 const availableStreams = {
                      '402431': {
                         title: 'Wicked',
-                        url: 'https://www.sw.vidce.net/d/yEBBeXTv5wlwa0L64bdu6g/1737791598/video/2015/tt14227048.mp4', // Replace with actual links
+                        url: 'https://sw.nuyhtiukmijvcjuhb.site/d/Act8Js5r0fWXAGeua2o5-Q/1770629395/video/2015/tt4154756.mp4', // Replace with actual links
                         "behaviorHints": {
                             "notWebReady": false
                         }
                     },
                     '585083': {
                         title: 'Монстри на канікулах: Трансформанія',
-                        url: 'https://s1.hdvbua.pro/media1/content/stream/films/hotel_transylvania_transformania_2022_webrip_1080p_83600/hls/1080/index.m3u8', // Replace with actual links
+                        url: 'https://ashdi.vip/video08/2/new/zootopia.2.2025.1080p.it.webdl.dd5.1.h.264spilno_232851/hls/AqaXi3WGjuRekhH+Bo0=/index.m3u8', // Replace with actual links
                         "behaviorHints": {
                             "notWebReady": true
                         }
